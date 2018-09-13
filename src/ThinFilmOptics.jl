@@ -14,7 +14,7 @@ export Spectra
 Performs the calculation of reflectance, transmittance, absorptance, electric field and photonic band gap (for photonic crystals only) using the transfer matrix formalism.
 
 Usage:
-    results = Secptra(λ, λ0, nlayers, dflags, dinput, polarization, materials, θ, stepsflag, emfflag, emflayerdivision, pbgflag, pbgplot)
+    results = Spectra(λ, λ0, nlayers, dflags, dinput, polarization, materials, θ, stepsflag, emfflag, emflayerdivision, pbgflag, pbgplot)
 
 Input:
     λ: wavelength range [nm]
