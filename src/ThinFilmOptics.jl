@@ -14,7 +14,7 @@ export Spectra
 Performs the calculation of reflectance, transmittance, absorptance, electric field and photonic band gap (for photonic crystals only) using the transfer matrix formalism.
 
 Usage:
-    results = Spectra(λ, λ0, nlayers, dflags, dinput, polarization, materials, θ, stepsflag, emfflag, emflayerdivision, pbgflag, pbgplot)
+    results = Spectra(λ, λ0, nlayers, dflags, dinput, polarization, materials, θ, emfflag, emflayerdivision, pbgflag)
 
 Input:
     λ: wavelength range [nm]
@@ -25,11 +25,9 @@ Input:
     polarization: polarization (1-->p, 0-->s, between 0 and 1 calculations are averaged)
     materials: materials inside the multilayer
     θ: angle of incidence [degrees]
-    stepsflag: flag that indicates if the index steps are displayed (1) or not (0). Default is 0.
     emfflag: flag that indicates if the calculation of electric field is required (1) or not (0). Default is 0.
     emflayerdivision: number of sublayers in which each layer will be divided to calculate the electric field. Default is 1.
     pbgflag: flag that indicates if photonic band gap must be calculated (1) or not (0). Only valid for periodic structures. Default is 0.
-    pbgplot: indicates if the photonic dispersion is to be plot (1) or not (0). Default is 0.
 
 Output:
     results: structure with the following fields:
@@ -52,6 +50,8 @@ Output:
         kbloch: polarization averaged Bloch dispersion wavevectors
         multilayerdepth: depth profile in the multilayer (taking into account the emflayerdivision for the emf plot) [nm]
         nλ0: refractive indexes profile at the central wavelength reflectance
+        ηs: admittance of the whole structure for s-polarization
+        ηp: admittance of the whole structure for p-polarization
 
 author: lnacquaroli
 """
@@ -106,11 +106,6 @@ function Spectra(λ::AbstractArray{A1,M1}, λ0::M7, nlayers::AbstractArray{A2,M2
     nλ0 = indexesprofile[idxλ0,:] # nice to return to plot the profile steps
 
     # Calculation of complex coefficients of reflection, transmission and emf
-    # if emfflag == 0 # no emf calculation requested
-    #     Rp, Rs, R, Tp, Ts, T, rrp, rrs, ttp, tts, emfp, emfs, emf, ηs, ηp = reflectiontransmission(indexesprofile, d, λ, θ, polarization)
-    # elseif emfflag == 1 # emf calculation requested
-    #     Rp, Rs, R, Tp, Ts, T, rrp, rrs, ttp, tts, emfp, emfs, emf, ηs, ηp = reflectiontransmissionemf(indexesprofile, d, λ, θ, polarization, emflayerdivision)
-    # end
     Rp, Rs, R, Tp, Ts, T, rrp, rrs, ttp, tts, emfp, emfs, emf, ηs, ηp = reflectiontransmissionemf(indexesprofile, d, λ, θ, polarization, emflayerdivision, emfflag)
 
     # Provide the multilayer depth considering the emflayerdivision
@@ -170,6 +165,8 @@ tts: s-wave complex transmission coefficient = f(λ,θ)
 emfp: p-wave electric field distribution = f(λ,θ,numberlayers)
 emfs: s-wave electric field distribution = f(λ,θ,numberlayers)
 emf: polarization averaged electric field distribution = f(λ,θ,numberlayers)
+ηs: admittance of the whole structure for s-polarization
+ηp: admittance of the whole structure for p-polarization
 
 author: lnacquaroli
 """
