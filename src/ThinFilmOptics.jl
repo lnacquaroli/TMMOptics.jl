@@ -2,7 +2,7 @@
 Performs the calculation of reflectance, transmittance, absorptance, electric field and photonic band gap (for photonic crystals only) using the transfer matrix formalism.
 
 Usage:
-    results = thinfilmoptics(λ, λ0, nlayers, dflags, dinput, polarization, materials, θ, emfflag, emflayerdivision, pbgflag)
+    results = Spectra(λ, λ0, nlayers, dflags, dinput, polarization, materials, θ, emfflag, emflayerdivision, pbgflag)
 
 Input:
     λ: wavelength range [nm]
@@ -140,33 +140,6 @@ makecolumns(x::Int64) = x
 
 """
 Function that computes the transfer matrix method to calculate the reflection and transmission coefficients, their spectra and the EMF. In this function the electromagnetic field is calculated (emfflag = 1).
-
-Usage: Rp, Rs, R, Tp, Ts, T, rrp, rrs, ttp, tts, emfp, emfs, emf = reflectiontransmission(indexprofile, d, λ, θ, w, nsl, totalnumberlayers)
-Input:
-indexprofile: refractive index for each wavelength and layer
-d:            thickness of each layer
-λ:            wavelength range
-θ:            range of angles of incidence
-w:            polarization
-nsl:          number of divisions per layer
-totalnumberlayers: nsl*length(d)
-Output:
-Rp: p-wave complex reflectance = f(λ,θ)
-Rs: s-wave complex reflectance = f(λ,θ)
-R: polarization averaged reflectance = f(λ,θ)
-Tp: p-wave complex transmittance = f(λ,θ)
-Ts: s-wave complex transmittance = f(λ,θ)
-T: polarization averaged transmittance = f(λ,θ)
-rrp: p-wave complex reflection coefficient = f(λ,θ)
-rrs: s-wave complex reflection coefficient = f(λ,θ)
-ttp: p-wave complex transmission coefficient = f(λ,θ)
-tts: s-wave complex transmission coefficient = f(λ,θ)
-emfp: p-wave electric field distribution = f(λ,θ,numberlayers)
-emfs: s-wave electric field distribution = f(λ,θ,numberlayers)
-emf: polarization averaged electric field distribution = f(λ,θ,numberlayers)
-ηs: admittance of the whole structure for s-polarization
-ηp: admittance of the whole structure for p-polarization
-author: lnacquaroli
 """
 function reflectiontransmissionemf(indexprofile::AbstractArray{U,P}, d::AbstractArray{V,M}, λ::AbstractArray{V,O}, θ::AbstractArray{V,Q}, w::W, nsl::S, emfflag::S2) where {U<:ComplexF64, P, V<:Float64, M, O, Q, W<:Number, S<:Int64, S2<:Number}
 
@@ -323,24 +296,6 @@ end
 
 """
 Function that computes the photonic dispersion of ordered structures (crystals only) alternating two different dielectric layers (pbgflag = 1).
-
-Usage: kblochp, kblochs, kbloch = photonicdispersion(λ, θ, Nvec, esp, λ0, wave, Rp, Rs, R)
-
-Input:
-    λ: wavelength range
-    θ: range of angles of incidence
-    Nvec: refractive index for each wavelength and layer
-    λ0: wavelength reference
-    wave: polarization
-    Rp: p-wave complex reflectance
-    Rs: s-wave complex reflectance
-    R:  polarization averaged reflectance
-Output:
-    kblochp: p-wave Bloch dispersion wavevectors
-    kblochs: s-wave Bloch dispersion wavevectors
-    kbloch: polarization averaged Bloch dispersion wavevectors
-
-author: lnacquaroli
 """
 function photonicdispersion(λ::AbstractArray{T,M}, θ::AbstractArray{U,N}, Nvec::AbstractArray{V,O}, esp::AbstractArray{W,P}, λ0::S, wave::S) where {T<:Number, M, U<:Number, N, V<:Number, O, W<:Number, P, S<:Number}
 
