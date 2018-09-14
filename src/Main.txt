@@ -1,1 +1,3 @@
 Main program and useful functions to plot results.
+
+In this branch I will be moving the refractive index database outside the main module. Thus, users can use custom refractive index functions easily.
