@@ -1,20 +1,8 @@
-module ThinFilmOptics
-
-using LinearAlgebra #, PyPlot, PlotUtils, LaTeXStrings
-# using Printf: @sprintf
-include("RIdb.jl") # collection of refractive indexes data
-using .RIdb: aluminum, air, bk7, chrome, dummy, glass, gold, silicon, silicontemperature, silver, sno2f
-include("MixingRules.jl") # collection of mixing rules for dielectric functions
-using .MixingRules: bruggemanspheres, looyengacylinders, looyengaspheres, lorentzlorenz, maxwellgarnettspheres, monecke, gedf, gem
-
-# export the results structure
-export Spectra
-
 """
 Performs the calculation of reflectance, transmittance, absorptance, electric field and photonic band gap (for photonic crystals only) using the transfer matrix formalism.
 
 Usage:
-    results = Spectra(λ, λ0, nlayers, dflags, dinput, polarization, materials, θ, emfflag, emflayerdivision, pbgflag)
+    results = thinfilmoptics(λ, λ0, nlayers, dflags, dinput, polarization, materials, θ, emfflag, emflayerdivision, pbgflag)
 
 Input:
     λ: wavelength range [nm]
@@ -52,9 +40,20 @@ Output:
         nλ0: refractive indexes profile at the central wavelength reflectance
         ηs: admittance of the whole structure for s-polarization
         ηp: admittance of the whole structure for p-polarization
-
 author: lnacquaroli
 """
+
+module ThinFilmOptics
+
+using LinearAlgebra
+include("RIdb.jl") # collection of refractive indexes data
+using .RIdb: aluminum, air, bk7, chrome, dummy, glass, gold, silicon, silicontemperature, silver, sno2f
+include("MixingRules.jl") # collection of mixing rules for dielectric functions
+using .MixingRules: bruggemanspheres, looyengacylinders, looyengaspheres, lorentzlorenz, maxwellgarnettspheres, monecke, gedf, gem
+
+# export the results structure
+export Spectra
+
 # define the output type
 struct Spectra{N1<:Float64, N2<:Number, N3<:ComplexF64, N4<:Number, N5<:Number}
     Rp::Array{N1}; Rs::Array{N1}; R::Array{N1}; Tp::Array{N1}; Ts::Array{N1}; T::Array{N1};
@@ -167,7 +166,6 @@ emfs: s-wave electric field distribution = f(λ,θ,numberlayers)
 emf: polarization averaged electric field distribution = f(λ,θ,numberlayers)
 ηs: admittance of the whole structure for s-polarization
 ηp: admittance of the whole structure for p-polarization
-
 author: lnacquaroli
 """
 function reflectiontransmissionemf(indexprofile::AbstractArray{U,P}, d::AbstractArray{V,M}, λ::AbstractArray{V,O}, θ::AbstractArray{V,Q}, w::W, nsl::S, emfflag::S2) where {U<:ComplexF64, P, V<:Float64, M, O, Q, W<:Number, S<:Int64, S2<:Number}
@@ -293,7 +291,7 @@ function fresnell(y::AbstractArray{A1,B1}, A::AbstractArray{A2,B2}) where {A1<:C
     return rr, tt
 end # fresnell(...)
 
-"""computes the inverse total transfer matrix, and admittance for the whole structure at each wavelenth and angle of incidence"""
+"""computes the inverse total transfer matrix for the whole structure at each wavelenth and angle of incidence"""
 function tmatrixinv(N::AbstractArray{B1,C1}, d::AbstractArray{B2,C2}, λ::C3, θ::C4, numlay::C5, nsl::C6, δ::AbstractArray{B3,C7}, η::AbstractArray{B4,C8}, Ma::AbstractArray{B5,C9}) where {B1<:ComplexF64, C1, B2<:Number, C2, C3<:Float64, C4<:Number, C5<:Number, C6<:Number, B3<:ComplexF64, C7, B4<:ComplexF64, C8, B5<:ComplexF64, C9}
     # Calculation of the matrix elements for the EM field
     M1 = Matrix{ComplexF64}(1.0*I, 2,2)
