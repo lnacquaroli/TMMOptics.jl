@@ -1,9 +1,19 @@
 #!/usr/bin/env julia
 
+using PyPlot
+
+# Workig directory
+path = "/home/leniac/GithubProjects/optics/thin_film_matrix/"
+cd(path)
+
 # Load modules
 include("ThinFilmOptics.jl") # main calculation program
 using Main.ThinFilmOptics: Spectra
-include("drawindexprofile.jl")
+include("RIdb.jl") # collection of refractive indexes data
+using Main.RIdb: aluminum, air, bk7, chrome, dummy, glass, gold, silicon, silicontemperature, silver, sno2f, h2o, etoh
+include("MixingRules.jl") # collection of mixing rules for dielectric functions
+using Main.MixingRules: bruggemanspheres, looyengacylinders, looyengaspheres, lorentzlorenz, maxwellgarnettspheres, monecke, gedf, gem
+include("indexprofileplot.jl")
 include("photonicdispersionplot.jl")
 
 # Wavelength range [nm]
@@ -19,12 +29,12 @@ d = [77 56 39]
 # Flag that indicates whether the thicknesses input are optical (1) or geometrical (0), it must be specified for each layer as they can be combined
 dflag = zeros.(lastindex(nprofile)-2,1)
 # Materials profile for each different layer: the nprofile keeps all the information about how this materials will be placed in the structure. Here there incident material is air, then number 2 in nprofile is the looyenga with 0.89 porosity, the number 3 in nprofile is looyenga with 0.7 porosity, the number 4 is looyenga with 0.49 porosity and the substrate (5 in nprofile) is silicon. The number of elements inside 'materials' variable must match the maximum value of nprofile
-l1 = :(air($(λ))) # outermost medium
-l2 = :(looyengaspheres(air($(λ)),silicon($(λ)),0.89))
-l3 = :(looyengaspheres(air($(λ)),silicon($(λ)),0.70))
-l4 = :(looyengaspheres(air($(λ)),silicon($(λ)),0.41))
-l5 = :(silicon($(λ))) # substrate medium
-materials = [l1 l2 l3 l4 l5] # 
+l1 = air(λ) # outermost medium
+l2 = looyengaspheres(air(λ),silicon(λ),0.89)
+l3 = looyengaspheres(air(λ),silicon(λ),0.70)
+l4 = looyengaspheres(air(λ),silicon(λ),0.41)
+l5 = silicon(λ) # substrate medium
+materials = [l1 l2 l3 l4 l5] #
 # polarization, w=1 p-type (TM) wave, and w=0 s-type (TE) wave or a mix of both with any intermediate value
 w = 1.
 # calculation of the electromagnetic field profile: yes (1) or no (0)
@@ -54,14 +64,14 @@ xlabel("Wavelength [nm]")
 ylabel("Reflectance")
 
 # plot the refractive index profile with the help of the custom function, drawindexprofile
-drawindexprofile(λ, results1.nλ0, results1.d, nprofile, results1.emf, results1.multilayerdepth, θ, λ0)
+indexprofileplot(λ, results1.nλ0, results1.d, nprofile, results1.emf, results1.multilayerdepth, θ, λ0)
 
 # plot the EMF pattern
 emfield = log10.(copy(dropdims(results1.emf, dims=2)')) # surface plots cannot handle Adjoint yet
 figure()
 surface = contourf(λ, vec(results1.multilayerdepth), emfield, 20)
 cb1_tags = floor.(LinRange(minimum(emfield), maximum(emfield), 5))
-cb1 = colorbar(surface), ticks=cb1_tags)
+cb1 = colorbar(surface, ticks=cb1_tags)
 cb1[:set_label]("EMF intensity")
 ax2 = gca()
 ax2[:tick_params](which="both", direction="in", pad=10, labelsize=22) # ticks offset
