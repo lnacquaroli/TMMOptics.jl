@@ -6,7 +6,7 @@ author: lnacquaroli
 using PyPlot, PlotUtils, LaTeXStrings
 using Printf: @sprintf
 
-function drawindexprofile(λ::AbstractArray{T,M}, nprofile::AbstractArray{U,N}, dprofile::AbstractArray{V,O}, nlayers::AbstractArray{W,P}, emf::AbstractArray{X,Q}, multilayerdepth::AbstractArray{Y,R}, θ::AbstractArray{Z,S}, λ0::A2) where {T<:Number, M, U<:Number, N, V<:Number, O, W<:Number, P, X<:Number, Q, Y<:Number, R, Z<:Number, S, A1<:Number, A2<:Number}
+function indexprofileplot(λ::AbstractArray{T,M}, nprofile::AbstractArray{U,N}, dprofile::AbstractArray{V,O}, nlayers::AbstractArray{W,P}, emf::AbstractArray{X,Q}, multilayerdepth::AbstractArray{Y,R}, θ::AbstractArray{Z,S}, λ0::A2) where {T<:Number, M, U<:Number, N, V<:Number, O, W<:Number, P, X<:Number, Q, Y<:Number, R, Z<:Number, S, A1<:Number, A2<:Number}
 
     # check input
     numelnlayers = lastindex(nlayers)
