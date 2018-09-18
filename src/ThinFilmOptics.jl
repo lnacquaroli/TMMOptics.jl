@@ -46,10 +46,6 @@ author: lnacquaroli
 module ThinFilmOptics
 
 using LinearAlgebra
-include("RIdb.jl") # collection of refractive indexes data
-using .RIdb: aluminum, air, bk7, chrome, dummy, glass, gold, silicon, silicontemperature, silver, sno2f
-include("MixingRules.jl") # collection of mixing rules for dielectric functions
-using .MixingRules: bruggemanspheres, looyengacylinders, looyengaspheres, lorentzlorenz, maxwellgarnettspheres, monecke, gedf, gem
 
 # export the results structure
 export Spectra
@@ -66,7 +62,7 @@ struct Spectra{N1<:Float64, N2<:Number, N3<:ComplexF64, N4<:Number, N5<:Number}
     ηs::Array{N3}; ηp::Array{N3}
 end
 
-function Spectra(λ::AbstractArray{A1,M1}, λ0::M7, nlayers::AbstractArray{A2,M2}, dflags::AbstractArray{A3,M3}, dinput::AbstractArray{A4,M4}, polarization::A5, materials::AbstractArray{A6,M5}, θ::AbstractArray{A7,M6}, emfflag::A9=0, emflayerdivision::A10=1, pbgflag::A11=0) where {A1<:Number, M1, A2<:Number, M2, A3<:Number, M3, A4<:Number, M4, A5<:Number, M5, A6<:Expr, M6, A7<:Number, A9<:Number, A10<:Number, A11<:Number, M7<:Number}
+function Spectra(λ::AbstractArray{A1,M1}, λ0::M7, nlayers::AbstractArray{A2,M2}, dflags::AbstractArray{A3,M3}, dinput::AbstractArray{A4,M4}, polarization::A5, materials::AbstractArray{A6,M5}, θ::AbstractArray{A7,M6}, emfflag::A9=0, emflayerdivision::A10=1, pbgflag::A11=0) where {A1<:Number, M1, A2<:Number, M2, A3<:Number, M3, A4<:Number, M4, A5<:Number, M5, A6<:Number, M6, A7<:Number, A9<:Number, A10<:Number, A11<:Number, M7<:Number}
 
     # Load usable variables, work in columns and radians
     λ = makecolumns(λ)
@@ -82,13 +78,13 @@ function Spectra(λ::AbstractArray{A1,M1}, λ0::M7, nlayers::AbstractArray{A2,M2
     numberangles = lastindex(θ)
 
     # Check variables sizes
-    @assert maximum(nlayers) == lastindex(materials) "The number of refractive indexes in the materials variable should be at least equal to the maximum value inside the media profile"
+    @assert maximum(nlayers) == size(materials,2) "The number of refractive indexes in the materials variable should be at least equal to the maximum value inside the media profile"
     @assert numberlayers-2 == lastindex(dflags) "Number of elements of the thickness vector must be equal to that of sequence vector minus two"
 
     # Build the complex refractive index matrix for the whole structures
     indexesprofile = Array{ComplexF64,2}(undef, (numberlambda, numberlayers))
     for s = 1 : numberlayers
-        indexesprofile[:,s] = eval(materials[nlayers[s]])
+        indexesprofile[:,s] = materials[:,nlayers[s]]
     end # for s = 1 : numberlayers
 
     # Build the array of thickness depending on the input
@@ -204,7 +200,9 @@ function reflectiontransmissionemf(indexprofile::AbstractArray{U,P}, d::Abstract
 
 end # function reflectiontransmissionemf(...)
 
-"""computes the total transfer matrix, and admittance for the whole structure at each wavelenth and angle of incidence"""
+"""
+Computes the total transfer matrix, and admittance for the whole structure at each wavelenth and angle of incidence
+"""
 function tmatrix(N::AbstractArray{B1,C1}, d::AbstractArray{B2,C2}, λ::C3, θ::C4, numlay::C5) where {B1<:ComplexF64, C1, B2<:Number, C2, C3<:Float64, C4<:Number, C5<:Number}
 
     # Warm-up
@@ -249,13 +247,17 @@ function tmatrix(N::AbstractArray{B1,C1}, d::AbstractArray{B2,C2}, λ::C3, θ::C
 
 end # tmatrix(...)
 
-"""function that calculates the optical transfer matrix of a layer, φ: phase shift of the layer y: admittance of the layer, Τ: 2x2 optical tranfer matrix."""
+"""
+Function that calculates the optical transfer matrix of a layer, φ: phase shift of the layer y: admittance of the layer, Τ: 2x2 optical tranfer matrix.
+"""
 function Ω(φ, y)
     tempii = cos.(φ)
     Τ = [tempii (-im ./ y .* sin.(φ)); (-im .* y .* sin.(φ)) tempii]
 end # Ω(...)
 
-"""compute the reflection and transmission coefficients given the admittance and transfer matrix of the whole structure per wavelenth and angle of incidence"""
+"""
+Compute the reflection and transmission coefficients given the admittance and transfer matrix of the whole structure per wavelenth and angle of incidence.
+"""
 function fresnell(y::AbstractArray{A1,B1}, A::AbstractArray{A2,B2}) where {A1<:ComplexF64, B1, A2<:ComplexF64, B2}
     # reflection coefficient
     rr = (y[1]*A[1,1]-A[2,1]+y[1]*y[end]*A[1,2]-y[end]*A[2,2]) ./ (y[1]*A[1,1]+A[2,1]+y[1]*y[end]*A[1,2]+y[end]*A[2,2])
@@ -264,7 +266,9 @@ function fresnell(y::AbstractArray{A1,B1}, A::AbstractArray{A2,B2}) where {A1<:C
     return rr, tt
 end # fresnell(...)
 
-"""computes the inverse total transfer matrix for the whole structure at each wavelenth and angle of incidence"""
+"""
+Computes the inverse total transfer matrix for the whole structure at each wavelenth and angle of incidence.
+"""
 function tmatrixinv(N::AbstractArray{B1,C1}, d::AbstractArray{B2,C2}, λ::C3, θ::C4, numlay::C5, nsl::C6, δ::AbstractArray{B3,C7}, η::AbstractArray{B4,C8}, Ma::AbstractArray{B5,C9}) where {B1<:ComplexF64, C1, B2<:Number, C2, C3<:Float64, C4<:Number, C5<:Number, C6<:Number, B3<:ComplexF64, C7, B4<:ComplexF64, C8, B5<:ComplexF64, C9}
     # Calculation of the matrix elements for the EM field
     M1 = Matrix{ComplexF64}(1.0*I, 2,2)
@@ -282,13 +286,17 @@ function tmatrixinv(N::AbstractArray{B1,C1}, d::AbstractArray{B2,C2}, λ::C3, θ
     return G11, G12
 end # tmatrixinv(...)
 
-"""function that calculates the inverse of optical transfer matrix of a layer, φ:  phase shift of the layer, y: admittance of the layer, Τ: 2x2 optical tranfer matrix."""
+"""
+Function that calculates the inverse of optical transfer matrix of a layer, φ:  phase shift of the layer, y: admittance of the layer, Τ: 2x2 optical tranfer matrix.
+"""
 function Ωinv(φ, y)
     tempii = cos.(φ)
     Τ = [tempii (im ./ y .* sin.(φ)); (im .* y .* sin.(φ)) tempii]
 end # Ωinv(...)
 
-"""compute the electric field distribution"""
+"""
+Compute the electric field distribution.
+"""
 function emfield(G11::Array{E1,F1}, G12::Array{E1,F1}, η::Array{E1,F2}, Ma::AbstractArray{A2,B2}) where {E1<:ComplexF64, F1, F2, A2<:ComplexF64, B2}
     # Field intensity calculation E0+
     emf = abs2.( (G11+η[end].*G12)./ (0.25 .* (η[1]*Ma[1,1]+Ma[2,1]+η[1]*η[end]*Ma[1,2]+η[end]*Ma[2,2])) )
