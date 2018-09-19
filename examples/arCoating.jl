@@ -1,9 +1,9 @@
 #!/usr/bin/env julia
 
-using PyPlot
+clearconsole()
 
 # Workig directory
-path = "/home/leniac/GithubProjects/optics/thin_film_matrix/"
+path = "/home/leniac/JuliaLangDev/thin_film_optical_matrix/v0.5_julia_v1.0_compatible/"
 cd(path)
 
 # Load modules
@@ -13,8 +13,8 @@ include("RIdb.jl") # collection of refractive indexes data
 using Main.RIdb: aluminum, air, bk7, chrome, dummy, glass, gold, silicon, silicontemperature, silver, sno2f, h2o, etoh
 include("MixingRules.jl") # collection of mixing rules for dielectric functions
 using Main.MixingRules: bruggemanspheres, looyengacylinders, looyengaspheres, lorentzlorenz, maxwellgarnettspheres, monecke, gedf, gem
-include("indexprofileplot.jl")
-include("photonicdispersionplot.jl")
+include("nplot.jl")
+include("pbgplot.jl")
 
 # Wavelength range [nm]
 λ = 200:1:1000. # [730.]
@@ -23,12 +23,12 @@ include("photonicdispersionplot.jl")
 # Angle of incidence [degrees], recommended to enter it as an array
 θ = [0.] #0:1:10
 # Refractive index of materials: elements represent the index position below in the structure (surface down to substrate)
-nprofile = [1 2 3 4 5]
+n = [1 2 3 4 5]
 # Thicknesses vector of each layer [nm], incident and substrate are not included (semi-infinite)
 d = [77 56 39]
 # Flag that indicates whether the thicknesses input are optical (1) or geometrical (0), it must be specified for each layer as they can be combined
-dflag = zeros.(lastindex(nprofile)-2,1)
-# Materials profile for each different layer: the nprofile keeps all the information about how this materials will be placed in the structure. Here there incident material is air, then number 2 in nprofile is the looyenga with 0.89 porosity, the number 3 in nprofile is looyenga with 0.7 porosity, the number 4 is looyenga with 0.49 porosity and the substrate (5 in nprofile) is silicon. The number of elements inside 'materials' variable must match the maximum value of nprofile
+dflag = zeros.(lastindex(n)-2,1)
+# Materials profile for each different layer: the n keeps all the information about how this materials will be placed in the structure. Here there incident material is air, then number 2 in n is the looyenga with 0.89 porosity, the number 3 in n is looyenga with 0.7 porosity, the number 4 is looyenga with 0.49 porosity and the substrate (5 in n) is silicon. The number of elements inside 'materials' variable must match the maximum value of n
 l1 = air(λ) # outermost medium
 l2 = looyengaspheres(air(λ),silicon(λ),0.89)
 l3 = looyengaspheres(air(λ),silicon(λ),0.70)
@@ -40,12 +40,12 @@ w = 1.
 # calculation of the electromagnetic field profile: yes (1) or no (0)
 emfflag = 1
 # subdivision of each layer for the calculation of the EMF
-layerdivision = 10
+h = 10
 # calculation of the photonic dispersion: yes (1) or no (0). Only available for crystals without defects
 pbgflag = 1
 
 # call main script
-results1 = Spectra(λ, λ0, nprofile, dflag, d, w, materials, θ, emfflag, layerdivision, pbgflag)
+results1 = Spectra(λ, λ0, n, dflag, d, w, materials, θ, emfflag, h, pbgflag)
 
 ### Optional examples to plot results
 
@@ -57,29 +57,25 @@ plot(λ, 1 .- (results1.T + results1.R), label="Absorbance")
 legend(loc="best")
 ax1 = gca()
 ax1[:tick_params](which="both", direction="in", pad=10, labelsize=22) # ticks offset
-# ax1[:yaxis][:set_ticks_position]("both")
-# ax1[:xaxis][:set_ticks_position]("both")
 axis("tight")
 xlabel("Wavelength [nm]")
 ylabel("Reflectance")
 
-# plot the refractive index profile with the help of the custom function, drawindexprofile
-indexprofileplot(λ, results1.nλ0, results1.d, nprofile, results1.emf, results1.multilayerdepth, θ, λ0)
+# plot the refractive index profile
+nplot(λ, results1.nλ0, results1.d, n, results1.emf, results1.ℓ, θ, λ0)
 
 # plot the EMF pattern
 emfield = log10.(copy(dropdims(results1.emf, dims=2)')) # surface plots cannot handle Adjoint yet
 figure()
-surface = contourf(λ, vec(results1.multilayerdepth), emfield, 20)
+surface = contourf(λ, vec(results1.ℓ), emfield, 20)
 cb1_tags = floor.(LinRange(minimum(emfield), maximum(emfield), 5))
 cb1 = colorbar(surface, ticks=cb1_tags)
 cb1[:set_label]("EMF intensity")
 ax2 = gca()
 ax2[:tick_params](which="both", direction="in", pad=10, labelsize=22) # ticks offset
-ax2[:yaxis][:set_ticks_position]("both")
-ax2[:xaxis][:set_ticks_position]("both")
 axis("tight")
 xlabel("Wavelength [nm]")
 ylabel("Depth profile [nm]")
 
 # plot the photonic dispersion with custom function
-photonicdispersionplot(λ, θ, results1.d, results1.Rp, results1.Rs, results1.R, results1. kblochp, results1.kblochs, results1.kbloch)
+pbgplot(λ, θ, results1.d, results1.Rp, results1.Rs, results1.R, results1.κp, results1.κs, results1.κ)
