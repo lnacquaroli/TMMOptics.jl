@@ -38,8 +38,7 @@ Output:
         κ: w averaged Bloch dispersion wavevectors
         ℓ: depth profile in the multilayer (taking into account the h for the emf plot) [nm]
         nλ0: refractive indexes profile at the central wavelength reflectance
-        ηs: admittance of the whole structure for s-w
-        ηp: admittance of the whole structure for p-w
+        δ: phase shift
 author: lnacquaroli
 """
 
@@ -59,7 +58,8 @@ struct Spectra{N1<:Float64, N2<:Number, N3<:ComplexF64, N4<:Number, N5<:Number}
     κp::Array{N5}; κs::Array{N5}; κ::Array{N5};
     ℓ::Array{N1};
     nλ0::Array{N4};
-    ηs::Array{N3}; ηp::Array{N3}
+    ηp::Array{N3}; ηs::Array{N3};
+    δ::Array{N3}
 end
 
 function Spectra(λ::AbstractArray{A1,M1}, λ0::M7, n::AbstractArray{A2,M2}, dflags::AbstractArray{A3,M3}, dinput::AbstractArray{A4,M4}, w::A5, materials::AbstractArray{A6,M5}, θ::AbstractArray{A7,M6}, emfflag::A9=0, h::A10=1, pbgflag::A11=0) where {A1<:Number, M1, A2<:Number, M2, A3<:Number, M3, A4<:Number, M4, A5<:Number, M5, A6<:Number, M6, A7<:Number, A9<:Number, A10<:Number, A11<:Number, M7<:Number}
@@ -101,7 +101,7 @@ function Spectra(λ::AbstractArray{A1,M1}, λ0::M7, n::AbstractArray{A2,M2}, dfl
     nλ0 = nseq[idxλ0,:] # nice to return to plot the profile steps
 
     # Calculation of complex coefficients of reflection, transmission and emf
-    Rp, Rs, R, Tp, Ts, T, ρp, ρs, τp, τs, emfp, emfs, emf, ηs, ηp = reflectiontransmissionemf(nseq, d, λ, θ, w, h, emfflag)
+    Rp, Rs, R, Tp, Ts, T, ρp, ρs, τp, τs, emfp, emfs, emf, ηp, ηs, δ = reflectiontransmissionemf(nseq, d, λ, θ, w, h, emfflag)
 
     # Provide the multilayer depth considering the h
     temp1 = d / h
@@ -120,7 +120,7 @@ function Spectra(λ::AbstractArray{A1,M1}, λ0::M7, n::AbstractArray{A2,M2}, dfl
     end
 
     # Return variables
-    Spectra(Rp, Rs, R, Tp, Ts, T, ρp, ρs, τp, τs, emfp, emfs, emf, d, κp, κs, κ, ℓ, nλ0, ηs, ηp)
+    Spectra(Rp, Rs, R, Tp, Ts, T, ρp, ρs, τp, τs, emfp, emfs, emf, d, κp, κs, κ, ℓ, nλ0, ηp, ηs, δ)
 
 end # Spectra(...)
 
@@ -157,8 +157,9 @@ function reflectiontransmissionemf(nseq::AbstractArray{U,P}, d::AbstractArray{V,
     emfs = Array{Float64,3}(undef, (nλ, nθ, nh))
     emfp = similar(emfs)
     emf = similar(emfs)
-    ηs = Array{ComplexF64,3}(undef, (nλ, nθ, size(nseq,2)))
-    ηp = similar(ηs)
+    δ = Array{ComplexF64,3}(undef, (nλ, nθ, size(nseq,2)))
+    ηs = similar(δ)
+    ηp = similar(δ)
 
     for l = 1:nλ, a = 1:nθ
 
@@ -167,7 +168,7 @@ function reflectiontransmissionemf(nseq::AbstractArray{U,P}, d::AbstractArray{V,
         nN = lastindex(N)
 
         # Calculation of the optical transfer matrix for all layers
-        ηs[l,a,:], ηp[l,a,:], Ωs, Ωp, δ = tmatrix(N, d, λ[l], θ[a], nN)
+        ηs[l,a,:], ηp[l,a,:], Ωs, Ωp, δ[l,a,:] = tmatrix(N, d, λ[l], θ[a], nN)
 
         # Compute the Fresnell coefficients
         ρs[l,a], τs[l,a] = fresnell(ηs[l,a,:], Ωs)
@@ -182,11 +183,11 @@ function reflectiontransmissionemf(nseq::AbstractArray{U,P}, d::AbstractArray{V,
 
         if emfflag == 1
             # Calculation of the inverse optical transfer for all layers
-            Gs11, Gs12 = G(N, d, λ[l], θ[a], nN, h, δ, ηs[l,a,:], Ωs)
-            Gp11, Gp12 = G(N, d, λ[l], θ[a], nN, h, δ, ηp[l,a,:], Ωp)
+            gs11, gs12 = G(N, d, λ[l], θ[a], nN, h, δ[l,a,:], ηs[l,a,:], Ωs)
+            gp11, gp12 = G(N, d, λ[l], θ[a], nN, h, δ[l,a,:], ηp[l,a,:], Ωp)
             # Field intensity respect to the incident beam
-            emfs[l,a,:] = F⃗(Gs11, Gs12, ηs[l,a,:], Ωs)
-            emfp[l,a,:] = F⃗(Gp11, Gp12, ηp[l,a,:], Ωp)
+            emfs[l,a,:] = F⃗(gs11, gs12, ηs[l,a,:], Ωs)
+            emfp[l,a,:] = F⃗(gp11, gp12, ηp[l,a,:], Ωp)
             emf[l,a,:] = w * emfp[l,a,:] + (1-w) * emfs[l,a,:]
         else
             emf = [0.]
@@ -196,7 +197,7 @@ function reflectiontransmissionemf(nseq::AbstractArray{U,P}, d::AbstractArray{V,
 
     end # for l = 1:nλ-1, a = 1:nθ
 
-    return Rp, Rs, R, Tp, Ts, T, ρp, ρs, τp, τs, emfp, emfs, emf, ηs, ηp
+    return Rp, Rs, R, Tp, Ts, T, ρp, ρs, τp, τs, emfp, emfs, emf, ηp, ηs, δ
 
 end # function reflectiontransmissionemf(...)
 
@@ -251,8 +252,9 @@ end # tmatrix(...)
 Function that calculates the optical transfer matrix of a layer, φ: phase shift of the layer y: admittance of the layer, Τ: 2x2 optical tranfer matrix.
 """
 function Φ(φ, y)
-    tempii = cos.(φ)
-    Τ = [tempii (-im ./ y .* sin.(φ)); (-im .* y .* sin.(φ)) tempii]
+    cosφ = cos.(φ)
+    sinφ = sin.(φ)
+    Τ = [cosφ (-im ./ y .* sinφ); (-im .* y .* sinφ) cosφ]
 end # Φ(...)
 
 """
@@ -273,33 +275,34 @@ function G(N::AbstractArray{B1,C1}, d::AbstractArray{B2,C2}, λ::C3, θ::C4, nN:
     # Calculation of the matrix elements for the EM field
     temp0 = Matrix{ComplexF64}(1.0*I, 2,2)
     temp1 = Matrix{ComplexF64}(1.0*I, 2,2)
-    G11 = Array{ComplexF64,1}(undef, (nN-2)*h)
-    G12 = similar(G11)
+    g11 = Array{ComplexF64,1}(undef, (nN-2)*h)
+    g12 = similar(g11)
     temp2 = δ/h
     for c = 2 : nN-1, j = 1 : h
         idx1 = h * (c-2) + j
-        temp1 = Φinv(temp2[c], η[c]) * temp1
+        temp1 = Ξ(temp2[c], η[c]) * temp1
         temp0 = temp1 * Ψ
-        G11[idx1] = temp0[1,1]
-        G12[idx1] = temp0[1,2]
+        g11[idx1] = temp0[1,1]
+        g12[idx1] = temp0[1,2]
     end # for c = 2 : nN-1, j = 1 : h
-    return G11, G12
+    return g11, g12
 end # G(...)
 
 """
 Function that calculates the inverse of optical transfer matrix of a layer, φ:  phase shift of the layer, y: admittance of the layer, Τ: 2x2 optical tranfer matrix.
 """
-function Φinv(φ, y)
-    tempii = cos.(φ)
-    Τ = [tempii (im ./ y .* sin.(φ)); (im .* y .* sin.(φ)) tempii]
-end # Φinv(...)
+function Ξ(φ, y)
+    cosφ = cos.(φ)
+    sinφ = sin.(φ)
+    Τ = [cosφ (im ./ y .* sinφ); (im .* y .* sinφ) cosφ]
+end # Ξ(...)
 
 """
 Compute the electric field distribution.
 """
-function F⃗(G11::Array{E1,F1}, G12::Array{E1,F1}, s::Array{E1,F2}, Ψ::AbstractArray{A2,B2}) where {E1<:ComplexF64, F1, F2, A2<:ComplexF64, B2}
+function F⃗(g11::Array{E1,F1}, g12::Array{E1,F1}, s::Array{E1,F2}, Ψ::AbstractArray{A2,B2}) where {E1<:ComplexF64, F1, F2, A2<:ComplexF64, B2}
     # Field intensity calculation E0+
-    emf = abs2.( (G11+s[end].*G12)./ (0.25 .* (s[1]*Ψ[1,1]+Ψ[2,1]+s[1]*s[end]*Ψ[1,2]+s[end]*Ψ[2,2])) )
+    emf = abs2.( (g11+s[end].*g12)./ (0.25 .* (s[1]*Ψ[1,1]+Ψ[2,1]+s[1]*s[end]*Ψ[1,2]+s[end]*Ψ[2,2])) )
 end
 
 """
@@ -311,7 +314,6 @@ function pbg(λ::AbstractArray{T,M}, θ::AbstractArray{U,N}, n::AbstractArray{V,
     nλ = lastindex(λ)
 
     # find central wavelength
-    # aux1 = findall(abs.(λ0-λ) == min(abs.(λ0-λ)))
     aux1 = findmin(abs.(λ .- λ0))[2][1]
     n1 = n[aux1,1]
     n2 = n[aux1,2]
@@ -319,32 +321,25 @@ function pbg(λ::AbstractArray{T,M}, θ::AbstractArray{U,N}, n::AbstractArray{V,
     # frequency range
     f = 2 * pi ./ λ
 
-    ys1 = Array{ComplexF64,1}(undef,nθ)
-    ys2 = similar(ys1) # use similar
-    yp1 = similar(ys1)
-    yp2 = similar(ys1)
-    θ1 = similar(ys1)
+    # admittances for p and s type
+    cosθ = cos.(θ)
+    ys1 = n1 .* cosθ
+    ys2 = n2 .* cosθ
+    yp1 = n1 ./ cosθ
+    yp2 = n2 ./ cosθ
+
+    # incidence angle of the second layer with snell's law of cosine
+    #θ1[a] = asin.(n1*sin.(θ[a])/n2)
+    θ1 = (1 .- (n1 ./ n2).^2 .* (1 .- cosθ.^2) ).^0.5
+
+    # warm-up
     κ = Array{ComplexF64}(undef, (nλ, nθ))
     κs = similar(κ)
     κp = similar(κ)
-    cosθ = cos.(θ)
     for a = 1 : nθ
-
-        # admittances for p and s type
-        ys1 = n1*cosθ[a]
-        ys2 = n2*cosθ[a]
-        yp1 = n1/cosθ[a]
-        yp2 = n2/cosθ[a]
-
-        # incidence angle of the second layer with snell's law of cosine
-        # θ1[a] = asin.(n1*sin.(θ[a])/n2)
-        θ1[a] = (1 - (n1 / n2)^2 * (1- θ[a]^2) )^0.5
-
         # Bloch wavevector
-        κs[:,a] = acos.(0.5 .* (2 .* cos.(d[1] .* f .* n1 .* cosθ[a] .* cos.(f .* d[2] .* n2 .* θ1[a]) - (ys2.^2 + ys1.^2) ./ ys2 ./ ys1 .* sin.(f .* d[1] .* n1 .* cosθ[a]) .* sin.(f .* d[2] .* n2 .* θ1[a]))))
-
-        κp[:,a] = acos.(0.5 * (2 .* cos.(d[1] .* f .* n1 .* cosθ[a]) .* cos.(f .* d[2] .* n2 .* θ1[a]) - (yp2.^2 + yp1.^2) ./ yp2 ./ yp1 .* sin.(f .* d[1] .* n1 .* cosθ[a]) .* sin.(f .* d[2] .* n2 .* θ1[a])))
-
+        κs[:,a] = acos.(0.5 .* (2 .* cos.(d[1] .* f .* n1 .* cosθ[a] .* cos.(f .* d[2] .* n2 .* θ1[a]) - (ys2[a].^2 + ys1[a].^2) ./ ys2[a] ./ ys1[a] .* sin.(f .* d[1] .* n1 .* cosθ[a]) .* sin.(f .* d[2] .* n2 .* θ1[a]))))
+        κp[:,a] = acos.(0.5 * (2 .* cos.(d[1] .* f .* n1 .* cosθ[a]) .* cos.(f .* d[2] .* n2 .* θ1[a]) - (yp2[a].^2 + yp1[a].^2) ./ yp2[a] ./ yp1[a] .* sin.(f .* d[1] .* n1 .* cosθ[a]) .* sin.(f .* d[2] .* n2 .* θ1[a])))
     end
     κ = κp * w + κs * (1-w)
     return κp, κs, κ

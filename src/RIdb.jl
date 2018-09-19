@@ -38,10 +38,11 @@ function aluminum(λ::AbstractArray{T,M}) where {T<:Number, M}
     readf = h5open(file, "r") do file
         read(file, "aluminum")
     end
+
     knots = (sort(vec(readf["lambda"])).*1e9,)
     spl_n = interpolate(knots, vec(readf["n"]), Gridded(Linear()))
     spl_k = interpolate(knots, vec(readf["k"]), Gridded(Linear()))
-    N = spl_n[λ] + im*spl_k[λ]
+    N = spl_n(λ) + im*spl_k(λ)
     return N
 end # EOF aluminum(...)
 
@@ -52,7 +53,7 @@ function bk7(λ::AbstractArray{T,M}) where {T<:Number, M}
     knots = (sort(vec(readf["lambda"]).*1e9),)
     spl_n = interpolate(knots, vec(readf["n"]), Gridded(Linear()))
     spl_k = interpolate(knots, vec(readf["k"]), Gridded(Linear()))
-    N = spl_n[λ] + im*spl_k[λ]
+    N = spl_n(λ) + im*spl_k(λ)
     return N
 end # EOF bk7(...)
 
@@ -64,7 +65,7 @@ function chrome(λ::AbstractArray{T,M}) where {T<:Number, M}
     knots = (sort(vec(readf["lambda"])),)
     spl_n = interpolate(knots, vec(readf["n"]), Gridded(Linear()))
     spl_k = interpolate(knots, vec(readf["k"]), Gridded(Linear()))
-    N = spl_n[λ] + im*spl_k[λ]
+    N = spl_n(λ) + im*spl_k(λ)
     return N
 end # EOF chrome(...)
 
@@ -76,7 +77,7 @@ function gold(λ::AbstractArray{T,M}) where {T<:Number, M}
     knots = (sort(vec(readf["lambda"])),)
     spl_n = interpolate(knots, vec(readf["n"]), Gridded(Linear()))
     spl_k = interpolate(knots, vec(readf["k"]), Gridded(Linear()))
-    N = spl_n[λ] + im*spl_k[λ]
+    N = spl_n(λ) + im*spl_k(λ)
     return N
 end # EOF gold(...)
 
@@ -88,7 +89,7 @@ function silicon(λ::AbstractArray{T,M}) where {T<:Number, M}
     knots = (sort(vec(readf["lambda"]))*1e9,)
     spl_n = interpolate(knots, vec(readf["n"]), Gridded(Linear()))
     spl_k = interpolate(knots, vec(readf["k"]), Gridded(Linear()))
-    N = spl_n[λ] + im*spl_k[λ]
+    N = spl_n(λ) + im*spl_k(λ)
     return N
 end # EOF silicon(...)
 
@@ -103,25 +104,25 @@ function silicontemperature(λ::AbstractArray{T,M}, t::S) where {T<:Number, M, S
         end
         knots = (sort(vec(readf["lambda"])),)
         spl_n20 = interpolate(knots, vec(readf["n20"]), Gridded(Linear()))
-        aux_n20 = spl_n20[λ]
+        aux_n20 = spl_n20(λ)
         spl_k20 = interpolate(knots, vec(readf["k20"]), Gridded(Linear()))
-        aux_k20 = spl_k20[λ]
+        aux_k20 = spl_k20(λ)
         spl_n450 = interpolate(knots, vec(readf["n450"]), Gridded(Linear()))
-        aux_n450 = spl_n450[λ]
+        aux_n450 = spl_n450(λ)
         spl_k450 = interpolate(knots, vec(readf["k450"]), Gridded(Linear()))
-        aux_k450 = spl_k450[λ]
+        aux_k450 = spl_k450(λ)
         dndt = (aux_n450-aux_n20)/(450-20)
         dkdt = (aux_k450-aux_k20)/(450-20)
         if t < 215
             spl_n = interpolate(knots, vec(readf["n20"]), Gridded(Linear()))
-            aux = spl_n[λ].*(1 .+ dndt*(t-20.))
+            aux = spl_n(λ).*(1 .+ dndt*(t-20.))
             spl_k = interpolate(knots, vec(readf["k20"]), Gridded(Linear()))
-            aux2 = spl_k[λ].*(1 .+ dkdt*(t-20.))
+            aux2 = spl_k(λ).*(1 .+ dkdt*(t-20.))
         else
             spl_n = interpolate(knots, vec(readf["n450"]), Gridded(Linear()))
-            aux = spl_n[λ].*(1 .+ dndt*(t-20.))
+            aux = spl_n(λ).*(1 .+ dndt*(t-20.))
             spl_k = interpolate(knots, vec(readf["k450"]), Gridded(Linear()))
-            aux2 = spl_k[λ].*(1 .+ dkdt*(t-20.))
+            aux2 = spl_k(λ).*(1 .+ dkdt*(t-20.))
         end
         N = aux + im*aux2
         return N
@@ -136,7 +137,7 @@ function silver(λ::AbstractArray{T,M}) where {T<:Number, M}
     knots = (sort(vec(readf["lambda"])),)
     spl_n = interpolate(knots, vec(readf["n"]), Gridded(Linear()))
     spl_k = interpolate(knots, vec(readf["k"]), Gridded(Linear()))
-    N = spl_n[λ] + im*spl_k[λ]
+    N = spl_n(λ) + im*spl_k(λ)
     N = aux + im*aux2
     return N
 end # EOF silver(...)
@@ -149,7 +150,7 @@ function sno2f(λ::AbstractArray{T,M}) where {T<:Number, M}
     knots = (sort(vec(readf["lambda"])*1e9),)
     spl_n = interpolate(knots, vec(readf["n"]), Gridded(Linear()))
     spl_k = interpolate(knots, vec(readf["k"]), Gridded(Linear()))
-    N = spl_n[λ] + im*spl_k[λ]
+    N = spl_n(λ) + im*spl_k(λ)
     return N
 end # EOF sno2f(...)
 
@@ -160,7 +161,7 @@ function h2o(λ::AbstractArray{T,M}) where {T<:Number, M}
     knots = (sort(vec(readf["lambda"])*1000),)
     spl_n = interpolate(knots, vec(readf["n"]), Gridded(Linear()))
     spl_k = interpolate(knots, vec(readf["k"]), Gridded(Linear()))
-    N = spl_n[λ] + im*spl_k[λ]
+    N = spl_n(λ) + im*spl_k(λ)
     return N
 end # EOF h2o(...)
 
