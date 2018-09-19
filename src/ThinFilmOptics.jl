@@ -19,16 +19,16 @@ Input:
 
 Output:
     results: structure with the following fields:
-        Rp: p-wave coΩplex reflectance
-        Rs: s-wave coΩplex reflectance
+        Rp: p-wave complex reflectance
+        Rs: s-wave complex reflectance
         R: w averaged reflectance
-        Tp: p-wave coΩplex transmittance
-        Ts: s-wave coΩplex transmittance
+        Tp: p-wave complex transmittance
+        Ts: s-wave complex transmittance
         T: w averaged transmittance
-        ρp: p-wave coΩplex reflection coefficient
-        ρs: s-wave coΩplex reflection coefficient
-        τp: p-wave coΩplex transmission coefficient
-        τs: s-wave coΩplex transmission coefficient
+        ρp: p-wave complex reflection coefficient
+        ρs: s-wave complex reflection coefficient
+        τp: p-wave complex transmission coefficient
+        τs: s-wave complex transmission coefficient
         emfp: p-wave electric field distribution
         emfs: s-wave electric field distribution
         emf: w averaged electric field distribution
@@ -100,7 +100,7 @@ function Spectra(λ::AbstractArray{A1,M1}, λ0::M7, n::AbstractArray{A2,M2}, dfl
     # Remove λ0 from λ and refractive index profile. Since dflags is a vector, we add λ0 to all nseq.
     nλ0 = nseq[idxλ0,:] # nice to return to plot the profile steps
 
-    # Calculation of coΩplex coefficients of reflection, transmission and emf
+    # Calculation of complex coefficients of reflection, transmission and emf
     Rp, Rs, R, Tp, Ts, T, ρp, ρs, τp, τs, emfp, emfs, emf, ηs, ηp = reflectiontransmissionemf(nseq, d, λ, θ, w, h, emfflag)
 
     # Provide the multilayer depth considering the h
@@ -143,7 +143,7 @@ function reflectiontransmissionemf(nseq::AbstractArray{U,P}, d::AbstractArray{V,
     nθ = lastindex(θ)
     nh = lastindex(d) * h # total number of layers
 
-    # Calculation of coΩplex coefficients of reflection, transmission and emf
+    # Calculation of complex coefficients of reflection, transmission and emf
     τs = Array{ComplexF64,2}(undef, (nλ, nθ))
     τp = similar(τs)
     ρs = similar(τs)
@@ -221,7 +221,7 @@ function tmatrix(N::AbstractArray{B1,C1}, d::AbstractArray{B2,C2}, λ::C3, θ::C
     # Calculation of the optical transfer matrix for each layer between the medium and the substrate
     for c = 2 : nN-1
 
-        # Compute angle of incidence inside each layer according to the cosine Snell law, to avoid cutoff of total internal reflection with coΩplex angles
+        # Compute angle of incidence inside each layer according to the cosine Snell law, to avoid cutoff of total internal reflection with complex angles
         # ϕ[c] = asin.( (N[c-1] / N[c] ) * sin.(ϕ[c-1]) )
         ϕ[c] = (1 - (N[c-1] / N[c])^2 * (1-ϕ[c-1]^2) )^0.5 # this is the cosine already
 
