@@ -1,7 +1,7 @@
 # ThinFilmOptics.jl
  Simulation and optimization of thin film stacks using optical matrices. Performs the calculation of reflectance, transmittance, absorptance, electric field and photonic band gap (for photonic crystals only) using the transfer matrix formalism.
 
-# Usage:
+## Usage:
     results = Spectra(λ, λ0, n, dflags, dinput, w, materials, θ, emfflag, h, pbgflag)
 
 `Spectra` is the function called fom the main module `ThinFilmOptics.jl`. (See `results` also)
