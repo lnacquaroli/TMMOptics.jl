@@ -64,7 +64,7 @@ ylabel("Reflectance")
 nplot(λ, results1.nλ0, results1.d, n, results1.emf, results1.ℓ, θ, λ0)
 
 # plot the EMF pattern
-emfield = log10.(copy(dropdims(results1.emf, dims=2)')) # surface plots cannot handle Adjoint yet
+emfield = log10.(Matrix(dropdims(results1.emf, dims=2)')) # surface plots cannot handle Adjoint yet
 figure()
 surface = contourf(λ, vec(results1.ℓ), emfield, 20)
 cb1_tags = floor.(LinRange(minimum(emfield), maximum(emfield), 5))
@@ -72,6 +72,20 @@ cb1 = colorbar(surface, ticks=cb1_tags)
 cb1[:set_label]("EMF intensity")
 ax2 = gca()
 ax2[:tick_params](which="both", direction="in", pad=10, labelsize=22) # ticks offset
+axis("tight")
+xlabel("Wavelength [nm]")
+ylabel("Depth profile [nm]")
+
+# plot phase shift
+rdelta = real.(Matrix(dropdims(results1.δ, dims=2)')) # surface plots cannot handle Adjoint yet
+figure()
+d2 = [200; results1.d; 200] # add incident and subtrate media
+surface2 = contourf(λ, d2, rdelta, 20)
+cb2_tags = floor.(LinRange(minimum(rdelta), maximum(rdelta), 5))
+cb2 = colorbar(surface2, ticks=cb2_tags)
+cb2[:set_label]("EMF intensity")
+ax3 = gca()
+ax3[:tick_params](which="both", direction="in", pad=10, labelsize=22) # ticks offset
 axis("tight")
 xlabel("Wavelength [nm]")
 ylabel("Depth profile [nm]")
