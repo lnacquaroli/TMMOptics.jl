@@ -1,5 +1,5 @@
 # ThinFilmOptics.jl
- Simulation and optimization of thin film stacks using optical matrices. Performs the calculation of reflectance, transmittance, absorptance, electric field and photonic band gap (for photonic crystals only) using the transfer matrix formalism.
+ Simulation and optimization of thin film stacks using optical matrices for the propagation of plane waves through any layered systems. Performs the calculation of reflectance, transmittance, absorptance, electric field and photonic band gap (for photonic crystals only) using the transfer matrix formalism.
 
 ## Usage
     results = Spectra(λ, λ0, n, dflags, dinput, w, materials, θ, emfflag, h, pbgflag)
