@@ -16,7 +16,7 @@ results = Spectra(λ, λ0, n, dflags, dinput, w, materials, θ, emfflag=0, h=1, 
 
 #### Spectra
 
-`Spectra` is the function called fom the main module `ThinFilmOptics.jl`. (See `results` also)
+`Spectra` is the function called fom the main module `ThinFilmOptics.jl`. (See also `results`)
 
 #### Wavelength range
 
