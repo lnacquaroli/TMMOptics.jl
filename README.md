@@ -116,6 +116,8 @@ materials = [l1 l2 l3 l4]
 
 where the incident material is air and the substrate is silicon. The number `2` is a medium with index of refractive index in terms of Looyenga mixing rule with 0.86 porosity, and `3` with 0.54 porosity mixing air and silicon. Note here that `l2` will be placed inside the structure where there is a number `2` in `n`, `l3` will be placed where there is a `3` in `n`. This way of writing `n` and `materials` makes suitable to make cleaner input, especially when you want to compute multilayer stacks with lots of layers.
 
+The number of materials included here should be at least equal to the maximum element in `n`. You can put more if you know where to place them, but not less `maximum(n) == size(materials,2)`.
+
 #### Angle of incidence
 
 `θ` is an 1d-array that set the angle of incidence of the wave into the first (incident) medium. It accepts the same type of input as `λ`, in degrees. For instance:
