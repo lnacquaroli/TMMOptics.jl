@@ -183,9 +183,11 @@ By setting `θ` and `λ` as arrays with more than one element each, the quantiti
   
   `results.δ`: phase shift of the whole structure. 3d-array with lengths `λ`, `θ`, and `d`
 
+
 ## Welcome ideas
 
 If you have any ideas and suggestions to improve this in Julia, PRs and issues are welcomed.
+
 
 ## Other projects in optics (not necessarily in Julia)
 
