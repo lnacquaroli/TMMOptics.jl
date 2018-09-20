@@ -3,7 +3,8 @@
 
 ## Usage
     ```julia
-    results = Spectra(λ, λ0, n, dflags, dinput, w, materials, θ, emfflag, h, pbgflag)```
+    results = Spectra(λ, λ0, n, dflags, dinput, w, materials, θ, emfflag, h, pbgflag)
+    ```
 
 `Spectra` is the function called fom the main module `ThinFilmOptics.jl`. (See `results` also)
 
