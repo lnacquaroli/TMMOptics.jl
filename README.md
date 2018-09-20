@@ -12,7 +12,7 @@ The typical calling structure is as follow:
 results = Spectra(λ, λ0, n, dflags, dinput, w, materials, θ, emfflag=0, h=1, pbgflag=0)
 ```
 
-### Input
+## Input
 
 #### Spectra
 
@@ -139,7 +139,7 @@ By setting `θ` and `λ` as arrays with more than one element each, the quantiti
 
 `pbgflag` indicates whether to calculate or not the photonic dispersion. It is only useful when computing DBR, i.e., when computing binary periodic systems that alternate two different refractive indexes. By default `pbgflag = 0`.
 
-### Output
+## Output
 
 `results` is a structure with type `Spectra` that contains the following fields computed by the main program:
 
