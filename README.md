@@ -1,6 +1,6 @@
 # TMMOptics.jl
 
-Simulation of the propagation of plane waves through arbitrary layered system of thin film stacks using optical matrices. Performs the calculation of reflectance, transmittance, absorptance, electric field and photonic band gap (for photonic crystals only) using the transfer matrix formalism. For further details see [https://arxiv.org/abs/1809.07708](https://arxiv.org/abs/1809.07708).
+Simulation of the propagation of plane waves through arbitrary layered system of thin film stacks using optical matrices. Performs the calculation of reflectance, transmittance, absorptance, electromagnetic field and photonic band gap (for photonic crystals only) using the transfer matrix formalism. For further details see [https://arxiv.org/abs/1809.07708](https://arxiv.org/abs/1809.07708).
 
 TMMOptics.jl is compatible with Julia version 1.0 or later.
 
