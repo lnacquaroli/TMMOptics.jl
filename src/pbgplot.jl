@@ -1,6 +1,7 @@
 """
-Example of function that plots the photonic dispersion, using PyPlot, PlotUtils and LaTeXStrings.
-author: lnacquaroli
+Plots the photonic dispersion of the multilayer structure processed
+using PyPlot, PlotUtils and LaTeXStrings.
+See examples folder for more details.
 """
 
 using PyPlot, PlotUtils, LaTeXStrings

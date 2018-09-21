@@ -1,15 +1,9 @@
-"""
-Module containing a collection of effective medium rules.
-To use: include("MixingRules.jl")
-using MixingRules: bruggemanspheres, looyengaspheres, looyengacylinders, ...
-"""
-
 module MixingRules
 
 export bruggemanspheres, looyengacylinders, looyengaspheres, lorentzlorenz, maxwellgarnettspheres, monecke, gedf, gem
 
 """
-This function calculate the complex refractive index of a porous material using Bruggeman model, for nonmagnetic and isotropic materials. Source: PHYSICAL REVIEW B VOLUME 61, NUMBER 15 15 APRIL 2000-I. It considers spheres (n1) hosted in another material (n2).
+Calculates the complex refractive index of a porous material using Bruggeman model, for nonmagnetic and isotropic materials. Source: PHYSICAL REVIEW B VOLUME 61, NUMBER 15 15 APRIL 2000-I. It considers spheres (n1) hosted in another material (n2).
 Usage: neff = bruggemanspheres(n1,n2,p)
 Input:
        n1:    refractive index of material 1
@@ -17,7 +11,6 @@ Input:
        p:     porosity parameter (real number, 0<p<1), proportion of n1 over total
 Output:
        neff:  effective refractive index
-author: lnacquaroli
 """
 function bruggemanspheres(n1::AbstractArray{T,N}, n2::AbstractArray{T,N}, p::S) where {T<:Number, N, S<:Float64}
     # dielectric function of each media
@@ -31,7 +24,7 @@ function bruggemanspheres(n1::AbstractArray{T,N}, n2::AbstractArray{T,N}, p::S) 
 end # EOF bruggemanspheres(...)
 
 """
-This function calculate the complex refractive index of the porous material using Looyenga-Landau-Lifshitz model, for nonmagnetic and isotropic materials. Source: Langmuir 2013, 29, 2784−2789. It considers cylinders (n1) hosted in another material (n2).
+Calculates the complex refractive index of the porous material using Looyenga-Landau-Lifshitz model, for nonmagnetic and isotropic materials. Source: Langmuir 2013, 29, 2784−2789. It considers cylinders (n1) hosted in another material (n2).
 Usage:
        neff = looyengacylinders(n1,n2,p)
 Input:
@@ -40,7 +33,6 @@ Input:
        p:     porosity parameter (real number, 0<p<1), proportion of n1 over total
 Output:
        neff:  effective refractive index
-author: lnacquaroli
 """
 function looyengacylinders(n1::AbstractArray{T,N}, n2::AbstractArray{T,N}, p::S) where {T<:Number, N, S<:Float64}
     # compute effective reractive index
@@ -48,7 +40,7 @@ function looyengacylinders(n1::AbstractArray{T,N}, n2::AbstractArray{T,N}, p::S)
 end # function looyengacylinders(...)
 
 """
-This function calculate the complex refractive index of the porous material using Looyenga-Landau-Lifshitz model, for nonmagnetic and isotropic materials. Source: IEEE TRANSACTIONS ON GEOSCIENCE AND REMOTE SENSING, VOL. 38, NO. 3, MAY 2000. It considers spheres (n1) hosted in another material (n2).
+Calculates the complex refractive index of the porous material using Looyenga-Landau-Lifshitz model, for nonmagnetic and isotropic materials. Source: IEEE TRANSACTIONS ON GEOSCIENCE AND REMOTE SENSING, VOL. 38, NO. 3, MAY 2000. It considers spheres (n1) hosted in another material (n2).
 Usage:
        neff = looyengaspheres(n1,n2,p)
 Input:
@@ -57,7 +49,6 @@ Input:
        p:     porosity parameter (real number, 0<p<1), proportion of n1 over total
 Output:
        neff:  effective refractive index
-author: lnacquaroli
 """
 function looyengaspheres(n1::AbstractArray{T,N}, n2::AbstractArray{T,N}, p::S) where {T<:Number, N, S<:Float64}
     # dielectric function of each media
@@ -69,7 +60,7 @@ function looyengaspheres(n1::AbstractArray{T,N}, n2::AbstractArray{T,N}, p::S) w
 end # function looyengaspheres(...)
 
 """
-This function returns the effective dielectric function of a binary liquid mixture. p is the proportion of component n1.
+Returns the effective dielectric function of a binary liquid mixture. p is the proportion of component n1.
 Usage:
        neff = lorentzlorenz(n1,n2,p)
 Input:
@@ -78,14 +69,13 @@ Input:
        p:     proportion of n1 over total, parameter (real number, 0<p<1)
 Output:
        neff:  effective refractive index
-author: lnacquaroli
 """
 function lorentzlorenz(n1::AbstractArray{T,N}, n2::AbstractArray{T,N}, p::S) where {T<:Number, N, S<:Float64}
     neff = sqrt.( ( n2.^2 .* ( -n1.^2 + 2 * p^2 - 2 - 2 .* p .* n1^2) ) ./ ( n1.^2 .* (p-1) - 2 - p .* n2.^2 )  )
 end
 
 """
-This function calculate the complex refractive index of the porous material using Maxwell-Garnett model, for nonmagnetic and isotropic materials. Source: IEEE TRANSACTIONS ON GEOSCIENCE AND REMOTE SENSING, VOL. 38, NO. 3, MAY 2000. It considers spheres (n1) hosted in another material (n2).
+Calculates the complex refractive index of the porous material using Maxwell-Garnett model, for nonmagnetic and isotropic materials. Source: IEEE TRANSACTIONS ON GEOSCIENCE AND REMOTE SENSING, VOL. 38, NO. 3, MAY 2000. It considers spheres (n1) hosted in another material (n2).
 Usage:
        neff = maxwellgarnettspheres(n1,n2,p)
 Input:
@@ -94,7 +84,6 @@ Input:
        p:     porosity parameter (real number, 0<p<1), proportion of n1 over total
 Output:
        neff:  effective refractive index
-author: lnacquaroli
 """
 function maxwellgarnettspheres(n1::AbstractArray{T,N}, n2::AbstractArray{T,N}, p::S) where {T<:Number, N, S<:Float64}
     # dielectric function of each media
@@ -106,7 +95,7 @@ function maxwellgarnettspheres(n1::AbstractArray{T,N}, n2::AbstractArray{T,N}, p
 end # EOF maxwellgarnettspheres(n1,n2,p)
 
 """
-This function calculate the complex refractive index of the porous material using Monecke model, for nonmagnetic and isotropic materials. Source: Phys. Rev. B, Vol. 61, Num. 15, 15 April, 2000-I.
+Calculates the complex refractive index of the porous material using Monecke model, for nonmagnetic and isotropic materials. Source: Phys. Rev. B, Vol. 61, Num. 15, 15 April, 2000-I.
 Usage:
         neff = monecke(n1, n2, p)
 Input:
@@ -115,7 +104,6 @@ Input:
         p:     porosity parameter (real number, 0<p<1), proportion of n1 over total
 Output:
         neff:  effective refractive index
-author: lnacquaroli
 """
 function monecke(n1::AbstractArray{T,N}, n2::AbstractArray{T,N}, p::S) where {T<:Number, N, S<:Float64}
     # dielectric function of each media
@@ -129,7 +117,7 @@ function monecke(n1::AbstractArray{T,N}, n2::AbstractArray{T,N}, p::S) where {T<
 end # EOF monecke(...)
 
 """
-This function calculate the complex refractive index of a porous material using a general dielectric model, for nonmagnetic and isotropic materials. Source: Appl. Phys. Lett. 108, 102902 (2016); doi: 10.1063/1.4943639. It considers n1) hosted in another material (n2).
+Calculates the complex refractive index of a porous material using a general dielectric model, for nonmagnetic and isotropic materials. Source: Appl. Phys. Lett. 108, 102902 (2016); doi: 10.1063/1.4943639. It considers n1) hosted in another material (n2).
 Usage: neff = gedf(n1, n2, p, β)
 Input:
        n1:    refractive index of filling material
@@ -138,7 +126,6 @@ Input:
        β:     either 1 or 3
 Output:
        neff:  effective refractive index
-author: lnacquaroli
 """
 function gedf(n1::AbstractArray{T,N}, n2::AbstractArray{T,N}, p::S, β::S) where {T<:Number, N, S<:Number}
     # dielectric function of each media
@@ -154,13 +141,13 @@ end # EOF gedf(...)
 Source: Carbon 40 (2002) 2801–2815. Here we used equation (3) and the parameters ϕ, ϕc and tp as fitted. For a more detailed analysis and relation to the depolarization factors see the reference. It considers (n1) hosted in another material (n2).
 Usage: neff = gedf(n1, n2, ϕ, ϕc, tp)
 Input:
-       n1:    refractive index of filling material (lower index)
-       n2:    refractive index of host material (higher index)
-       ϕ:     porosity parameter (real number, 0<ϕ<1), proportion of n1 over total
-       ϕc:    critical volume fraction at which the high-index phase first percolates
-       tp:    exponent related both to ϕc and to the shape of the grains
-Output: neff:  effective refractive index
-author: lnacquaroli
+    n1:    refractive index of filling material (lower index)
+    n2:    refractive index of host material (higher index)
+    ϕ:     porosity parameter (real number, 0<ϕ<1), proportion of n1 over total
+    ϕc:    critical volume fraction at which the high-index phase first percolates
+    tp:    exponent related both to ϕc and to the shape of the grains
+Output:
+    neff:  effective refractive index
 """
 function gem(n1::AbstractArray{T,N}, n2::AbstractArray{T,N}, ϕ::S, ϕc::S, tp::S) where {T<:Number, N, S<:Number}
     # dielectric function of each media

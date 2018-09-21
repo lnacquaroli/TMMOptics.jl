@@ -1,7 +1,3 @@
-"""
-Module containing a collection of refractive indexes. Data taken from databases such as https://refractiveindex.info, http://www.ioffe.ru/SVA/NSM/nk/, https://github.com/ulfgri/nk.
-"""
-
 module RIdb
 
 using Interpolations, HDF5

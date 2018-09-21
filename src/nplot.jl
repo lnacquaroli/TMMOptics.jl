@@ -1,6 +1,8 @@
 """
-Function that plots the multilayer structure, using PyPlot, PlotUtils and LaTeXStrings. Also using Printf: @sprintf to display some data.
-author: lnacquaroli
+Plots the index of refraction ath certain wavelength (usually λ0) of the multilayer structure computed.
+using PyPlot, PlotUtils, LaTeXStrings
+using Printf: @sprintf
+See examples folder for more details.
 """
 
 using PyPlot, PlotUtils, LaTeXStrings
