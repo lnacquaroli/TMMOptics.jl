@@ -194,7 +194,7 @@ This module depends on [Interpolations.jl](https://github.com/JuliaMath/Interpol
 Use of this module as follow, e.g.:
 ```julia
 include("pathToFile/RIdb.jl")
-Using Main.RIdb: aluminum, air, bk7, chrome, dummy, glass, gold, silicon, silicontemperature, silver, sno2f, h2o, etoh
+using Main.RIdb: aluminum, air, bk7, chrome, dummy, glass, gold, silicon, silicontemperature, silver, sno2f, h2o, etoh
 λ = 200:1000.
 n = silicon(λ)
 t = 240 # temperature in C
@@ -210,7 +210,7 @@ Module containing a collection of functions with effective index of refraction m
 
 ```julia
 include("pathToFile/RIdb.jl")
-Using Main.RIdb: aluminum, air, bk7, chrome, dummy, glass, gold, silicon, silicontemperature, silver, sno2f, h2o, etoh
+using Main.RIdb: aluminum, air, bk7, chrome, dummy, glass, gold, silicon, silicontemperature, silver, sno2f, h2o, etoh
 include("MixingRules.jl")
 using Main.MixingRules: bruggemanspheres, looyengacylinders, looyengaspheres, lorentzlorenz, maxwellgarnettspheres, monecke, gedf, gem
 λ = 200:1000.
