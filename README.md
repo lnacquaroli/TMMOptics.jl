@@ -145,51 +145,87 @@ By setting `θ` and `λ` as arrays with more than one element each, the quantiti
 
 `results` is a structure with type `Spectra` that contains the following fields computed by the main program:
 
-  `results.Rp`: p-wave complex reflectance. 2d-array with lengths of `λ` and `θ`
+  `Rp`: p-wave complex reflectance. 2d-array with lengths of `λ` and `θ`
   
-  `results.Rs`: s-wave complex reflectance. 2d-array with lengths of `λ` and `θ`
+  `Rs`: s-wave complex reflectance. 2d-array with lengths of `λ` and `θ`
   
-  `results.R`: w averaged reflectance. 2d-array with lengths of `λ` and `θ`
+  `R`: w averaged reflectance. 2d-array with lengths of `λ` and `θ`
   
-  `results.Tp`: p-wave complex transmittance. 2d-array with lengths of `λ` and `θ`
+  `Tp`: p-wave complex transmittance. 2d-array with lengths of `λ` and `θ`
   
-  `results.Ts`: s-wave complex transmittance. 2d-array with lengths of `λ` and `θ`
+  `Ts`: s-wave complex transmittance. 2d-array with lengths of `λ` and `θ`
   
-  `results.T`: w averaged transmittance. 2d-array with lengths of `λ` and `θ`
+  `T`: w averaged transmittance. 2d-array with lengths of `λ` and `θ`
   
-  `results.ρp`: p-wave complex reflection coefficient. 2d-array with lengths of `λ` and `θ`
+  `ρp`: p-wave complex reflection coefficient. 2d-array with lengths of `λ` and `θ`
   
-  `results.ρs`: s-wave complex reflection coefficient. 2d-array with lengths of `λ` and `θ`
+  `ρs`: s-wave complex reflection coefficient. 2d-array with lengths of `λ` and `θ`
   
-  `results.τp`: p-wave complex transmission coefficient. 2d-array with lengths of `λ` and `θ`
+  `τp`: p-wave complex transmission coefficient. 2d-array with lengths of `λ` and `θ`
   
-  `results.τs`: s-wave complex transmission coefficient. 2d-array with lengths of `λ` and `θ`
+  `τs`: s-wave complex transmission coefficient. 2d-array with lengths of `λ` and `θ`
   
-  `results.emfp`: p-wave electric field distribution. 3d-array with lengths of `λ`, `θ`, and `ℓ`
+  `emfp`: p-wave electric field distribution. 3d-array with lengths of `λ`, `θ`, and `ℓ`
   
-  `results.emfs`: s-wave electric field distribution. 3d-array with lengths of `λ`, `θ`, and `ℓ`
+  `emfs`: s-wave electric field distribution. 3d-array with lengths of `λ`, `θ`, and `ℓ`
   
-  `results.emf`: w averaged electric field distribution. 3d-array with lengths of `λ`, `θ`, and `ℓ`
+  `emf`: w averaged electric field distribution. 3d-array with lengths of `λ`, `θ`, and `ℓ`
   
-  `results.d`: thickness of each layer [nm]. Geometrical (physical) thickness of each layer as ordered by `n`. 1d-array with length of `d`
+  `d`: thickness of each layer [nm]. Geometrical (physical) thickness of each layer as ordered by `n`. 1d-array with length of input `d`
   
-  `results.κp`: p-wave Bloch dispersion wavevectors. 2d-array with lengths of `λ` and `θ`
+  `κp`: p-wave Bloch dispersion wavevectors. 2d-array with lengths of `λ` and `θ`
   
-  `results.κs`: s-wave Bloch dispersion wavevectors. 2d-array with lengths of `λ` and `θ`
+  `κs`: s-wave Bloch dispersion wavevectors. 2d-array with lengths of `λ` and `θ`
   
-  `results.κ`: w averaged Bloch dispersion wavevectors. 2d-array with lengths of `λ` and `θ`
+  `κ`: w averaged Bloch dispersion wavevectors. 2d-array with lengths of `λ` and `θ`
   
-  `results.ℓ`: depth profile in the multilayer stack taking into account `h` [nm]. Geometrical (physical) thickness of each layer, where each layer is divided into `h` sub-layers. 1d-array with length of `lastindex(d) * h`
+  `ℓ`: depth profile in the multilayer stack taking into account `h` [nm]. Geometrical (physical) thickness of each layer, where each layer is divided into `h` sub-layers. 1d-array with length of `lastindex(d) * h`
   
-  `results.nλ0`: profile of index of refraction profile computed at the wavelength reference `λ0`. 1d-array with length of `n`
+  `nλ0`: profile of index of refraction profile computed at the wavelength reference `λ0`. 1d-array with length of `n`
   
-  `results.δ`: phase shift of the whole structure. 3d-array with lengths `λ`, `θ`, and `d`
+  `δ`: phase shift of the whole structure. 3d-array with lengths `λ`, `θ`, and `d`
 
+## RIdb.jl
+
+Module containing a collection of functions with index of refration for the following materials: aluminum, air, bk7, chrome, dummy, glass, gold, silicon, silicontemperature, silver, sno2f, h2o, etoh. These functions accept as input arguments the wavelength range `λ`, and return the index of refraction as a complex floating number. Even for non-aborbent materials (where a list of zeros in the imaginary part is placed), the index works better with complex character. Users can use their own functions as well that output complex types though.
+
+This module depends on [Interpolations.jl](https://github.com/JuliaMath/Interpolations.jl) to return the index of refraction as a function of the input wavelength, which might differ from that of the experimental data. Also depends on [HDF5.jl](https://github.com/JuliaIO/HDF5.jl) since the data is compiled into a h5 file for simplicity. 
+
+Use of this module as follow, e.g.:
+```julia
+include("pathToFile/RIdb.jl")
+Using Main.RIdb: aluminum, air, bk7, chrome, dummy, glass, gold, silicon, silicontemperature, silver, sno2f, h2o, etoh
+λ = 200:1000.
+n = silicon(λ)
+t = 240 # temperature in C
+n = silicontemperature(λ, t)
+n = sno2f(λ)
+```
+
+Data taken from database: https://refractiveindex.info, http://www.ioffe.ru/SVA/NSM/nk/, https://github.com/ulfgri/nk.
+
+## MixingRules.jl
+
+Module containing a collection of functions with effective index of refraction mixing rules for binary systems, accepting two indexes of refraction with the same lengths and the volume fraction of one of them.
+
+```julia
+include("pathToFile/RIdb.jl")
+Using Main.RIdb: aluminum, air, bk7, chrome, dummy, glass, gold, silicon, silicontemperature, silver, sno2f, h2o, etoh
+include("MixingRules.jl")
+using Main.MixingRules: bruggemanspheres, looyengacylinders, looyengaspheres, lorentzlorenz, maxwellgarnettspheres, monecke, gedf, gem
+λ = 200:1000.
+f = 0.86 # volume fraction of air inside the host material
+l1 = looyengaspheres(air(λ), silicon(λ), f)
+l2 = looyengacylinder(air(λ), silicon(λ), f)
+l3 = lorentzlorens(h2o(λ), etoh(λ), f)
+l4 = maxwellgarnettspheres(air(λ), gold(λ), f)
+```
+
+Sources: [Theiss (1997)](https://www.sciencedirect.com/science/article/pii/S016757299600012X), [Torres-Costa et al. (2014)](https://www.sciencedirect.com/science/article/pii/B9780857097118500088), [Liu (2016](https://doi.org/10.1063/1.4943639), [Celzard et al. (2002)](https://doi.org/10.1016/S0008-6223(02)00196-3), [Urteaga et al. (2013)](https://dx.doi.org/10.1021/la304869y).
 
 ## We welcome suggestions
 
-If you have any ideas and suggestions to improve this in Julia, PRs and issues are welcomed.
-
+If you have ideas and suggestions to improve TMMOptics in Julia, PRs and issues are welcomed.
 
 ## Other projects in optics (not necessarily in Julia)
 
