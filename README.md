@@ -11,7 +11,7 @@ If you want to avoid reading any further you can jump to the examples posted ins
 The typical calling structure is as follow:
 
 ```julia
-results = Spectra(λ, λ0, n, dflags, dinput, w, materials, θ, emfflag=0, h=1, pbgflag=0)
+results = Spectra(λ, λ0, n, dflags, d, w, materials, θ, emfflag=0, h=1, pbgflag=0)
 ```
 
 `Spectra` is the main function called from the module `TMMOptics.jl`. (See also `results`)
@@ -45,25 +45,6 @@ which indicates that the incident medium is layer number 1 and the substrate is 
 n = [1 2 3 2 3 2 3 2 3 2 3 2 3 4]
 ```
 
-#### Thickness profile
-
-`d` is an 1d-array setting the thickness of each layer inside the multilayer stack, which accepts two types of input: the geometrical (physical) thickness in nanometers, or the fraction of optical thickness (product of the index of refraction at the wavelength of reference times the geometrical thickness) at the wavelength of reference `λ0`. The latter is useful when computing multilayer stacks and normally using quarter-wavelength or half-wavelength thicknesses. The elements of this array contains information about all the layers inside the multilayer, except the first and last ones (semi-infinite calculation). For instance, for the single layer example, we have
-```julia
-d = [648.]
-```
-
-while for the DBR, we can set the whole stack to have quarter-wavelength optical thickness as follow:
-```julia
-d = 1/4 * ones.(lastindex(n)-2,1)
-```
-
-It is also accepted to mixed both type of input here. We can set for instance:
-```julia
-d = [1/4 250. 1/2 980.]
-```
-
-for a four layer system. Remember that `d` does not include information about the incident and substrate.
-
 #### Type of thickness in profile
 
 `dflags` tells the script to treat `d` as optical or geometrical thickness. This gives more flexibility to the computation and also allows to mix the `d` inputs. If the thickness input element is optical `dflags = 1`, or if it is geometrical `dflags = 0`. The number of elements of `dflags` must equal that of `d`. For instance, for the single layer example above:
@@ -84,6 +65,25 @@ In the case of mixing flags input, we can write:
 ```julia
 dflags = [1 0 1 0]
 ```
+
+#### Thickness profile
+
+`d` is an 1d-array setting the thickness of each layer inside the multilayer stack, which accepts two types of input: the geometrical (physical) thickness in nanometers, or the fraction of optical thickness (product of the index of refraction at the wavelength of reference times the geometrical thickness) at the wavelength of reference `λ0`. The latter is useful when computing multilayer stacks and normally using quarter-wavelength or half-wavelength thicknesses. The elements of this array contains information about all the layers inside the multilayer, except the first and last ones (semi-infinite calculation). For instance, for the single layer example, we have
+```julia
+d = [648.]
+```
+
+while for the DBR, we can set the whole stack to have quarter-wavelength optical thickness as follow:
+```julia
+d = 1/4 * ones.(lastindex(n)-2,1)
+```
+
+It is also accepted to mixed both type of input here. We can set for instance:
+```julia
+d = [1/4 250. 1/2 980.]
+```
+
+for a four layer system. Remember that `d` does not include information about the incident and substrate.
 
 #### Polarization of the wave
 
