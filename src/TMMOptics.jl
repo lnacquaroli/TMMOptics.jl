@@ -83,7 +83,7 @@ function Spectra(λ::AbstractArray{A1,M1}, λ0::M7, n::AbstractArray{A2,M2}, dfl
 end # Spectra(...)
 
 """
-Function that makes column-wise arrays.
+Make column-wise input.
 """
 function makecolumns end
 makecolumns(x::AbstractArray{T,N}) where {T<:Number,N} = size(x,2) > size(x,1) ? x[:] : x
@@ -93,7 +93,7 @@ makecolumns(x::Float64) = x
 makecolumns(x::Int64) = x
 
 """
-Function that calculates the reflection and transmission coefficients, their spectra and the EMF. In this function the electromagnetic field is calculated if emfflag = 1.
+Computes the reflection and transmission coefficients, and their spectra. The electromagnetic field is calculated if emfflag = 1.
 """
 function rtemf(nseq::AbstractArray{U,P}, d::AbstractArray{V,M}, λ::AbstractArray{V,O}, θ::AbstractArray{V,Q}, w::W, h::S, emfflag::S2) where {U<:ComplexF64, P, V<:Float64, M, O, Q, W<:Number, S<:Int64, S2<:Number}
 
@@ -160,7 +160,7 @@ function rtemf(nseq::AbstractArray{U,P}, d::AbstractArray{V,M}, λ::AbstractArra
 end # function rtemf(...)
 
 """
-Computes the total transfer matrix, and admittance for the whole structure at each wavelenth and angle of incidence
+Computes the total transfer matrix and admittance for the whole structure at each wavelenth and angle of incidence.
 """
 function tmatrix(N::AbstractArray{B1,C1}, d::AbstractArray{B2,C2}, λ::C3, θ::C4, nN::C5) where {B1<:ComplexF64, C1, B2<:Number, C2, C3<:Float64, C4<:Number, C5<:Number}
 
@@ -207,16 +207,16 @@ function tmatrix(N::AbstractArray{B1,C1}, d::AbstractArray{B2,C2}, λ::C3, θ::C
 end # tmatrix(...)
 
 """
-Function that calculates the optical transfer matrix of a layer, φ: phase shift of the layer y: admittance of the layer, Τ: 2x2 optical tranfer matrix.
+Calculates the optical transfer matrix of a layer. φ: phase shift of the layer y: admittance of the layer, Τ: 2x2 optical tranfer matrix.
 """
-function Φ(φ, y)
+function Φ(φ::T1, y::T1) where {T1<:Number}
     cosφ = cos.(φ)
     sinφ = sin.(φ)
     Τ = [cosφ (-im ./ y .* sinφ); (-im .* y .* sinφ) cosφ]
 end # Φ(...)
 
 """
-Compute the reflection and transmission coefficients given the admittance and transfer matrix of the whole structure per wavelenth and angle of incidence.
+Computes the reflection and transmission coefficients given the admittance and transfer matrix of the whole structure per wavelenth and angle of incidence.
 """
 function fresnell(s::AbstractArray{A1,B1}, Ψ::AbstractArray{A2,B2}) where {A1<:ComplexF64, B1, A2<:ComplexF64, B2}
     # reflection coefficient
@@ -247,9 +247,9 @@ function G(N::AbstractArray{B1,C1}, d::AbstractArray{B2,C2}, λ::C3, θ::C4, nN:
 end # G(...)
 
 """
-Function that calculates the inverse of optical transfer matrix of a layer, φ:  phase shift of the layer, y: admittance of the layer, Τ: 2x2 optical tranfer matrix.
+Calculates the inverse of optical transfer matrix of a layer. φ:  phase shift of the layer, y: admittance of the layer, Τ: 2x2 optical tranfer matrix.
 """
-function Ξ(φ, y)
+function Ξ(φ::T1, y::T1) where{T1<:Number}
     cosφ = cos.(φ)
     sinφ = sin.(φ)
     Τ = [cosφ (im ./ y .* sinφ); (im .* y .* sinφ) cosφ]
@@ -264,7 +264,7 @@ function F⃗(g11::Array{E1,F1}, g12::Array{E1,F1}, s::Array{E1,F2}, Ψ::Abstrac
 end
 
 """
-Function that Computes the photonic dispersion of ordered structures (crystals only) alternating two different dielectric layers (pbgflag = 1).
+Computes the photonic dispersion of ordered structures (crystals only) alternating two different dielectric layers (pbgflag = 1).
 """
 function pbg(λ::AbstractArray{T,M}, θ::AbstractArray{U,N}, n::AbstractArray{V,O}, d::AbstractArray{W,P}, λ0::S, w::S) where {T<:Number, M, U<:Number, N, V<:Number, O, W<:Number, P, S<:Number}
 
