@@ -225,7 +225,7 @@ Sources: [Theiss (1997)](https://www.sciencedirect.com/science/article/pii/S0167
 
 ## Examples of useful plotting functions
 
-Included two types of plots so far are quite useful to visualize the type of structure being modeled.
+Included two types of plots so far are quite useful to visualize the type of structure being modeled. These are out of the main module as they can be customized by the user.
 
 #### nplot.jl (using PyPlot)
 
