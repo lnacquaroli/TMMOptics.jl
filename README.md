@@ -211,7 +211,7 @@ Module containing a collection of functions with effective index of refraction m
 ```julia
 include("pathToFile/RIdb.jl")
 using Main.RIdb: aluminum, air, bk7, chrome, dummy, glass, gold, silicon, silicontemperature, silver, sno2f, h2o, etoh
-include("MixingRules.jl")
+include("pathToFile/MixingRules.jl")
 using Main.MixingRules: bruggemanspheres, looyengacylinders, looyengaspheres, lorentzlorenz, maxwellgarnettspheres, monecke, gedf, gem
 λ = 200:1000.
 f = 0.86 # volume fraction of air inside the host material
