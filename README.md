@@ -1,8 +1,8 @@
-# ThinFilmOptics.jl
+# OpticalTransferMatrix.jl
 
 Simulation of the propagation of plane waves through arbitrary layered system of thin film stacks using optical matrices. Performs the calculation of reflectance, transmittance, absorptance, electric field and photonic band gap (for photonic crystals only) using the transfer matrix formalism.
 
-ThinFilmOptics.jl is compatible with Julia version 1.0 or later.
+OpticalTransferMatrix.jl is compatible with Julia version 1.0 or later.
 
 If you want to avoid reading any further you can jump to the examples posted inside the examples folder.
 
@@ -18,7 +18,7 @@ results = Spectra(λ, λ0, n, dflags, dinput, w, materials, θ, emfflag=0, h=1, 
 
 #### Spectra
 
-`Spectra` is the function called fom the main module `ThinFilmOptics.jl`. (See also `results`)
+`Spectra` is the function called fom the main module `OpticalTransferMatrix.jl`. (See also `results`)
 
 #### Wavelength range
 
