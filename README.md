@@ -14,11 +14,9 @@ The typical calling structure is as follow:
 results = Spectra(λ, λ0, n, dflags, dinput, w, materials, θ, emfflag=0, h=1, pbgflag=0)
 ```
 
+`Spectra` is the main function called from the module `TMMOptics.jl`. (See also `results`)
+
 ## Input
-
-#### Spectra
-
-`Spectra` is the function called fom the main module `TMMOptics.jl`. (See also `results`)
 
 #### Wavelength range
 
@@ -188,7 +186,7 @@ By setting `θ` and `λ` as arrays with more than one element each, the quantiti
   `results.δ`: phase shift of the whole structure. 3d-array with lengths `λ`, `θ`, and `d`
 
 
-## Welcome ideas
+## We welcome suggestions
 
 If you have any ideas and suggestions to improve this in Julia, PRs and issues are welcomed.
 
