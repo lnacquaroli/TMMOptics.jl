@@ -11,8 +11,7 @@ function nplot(λ::AbstractArray{T,M}, nλ0::AbstractArray{U,N}, d::AbstractArra
     # check input
     nn = lastindex(n)
     nd = lastindex(d)
-    # if size(d,1) != size(nλ0,1)-2
-    @assert nd == lastindex(nλ0)-2 "Variables dimensions disagree: length(nλ0)-2 = length(d)"
+    nd == lastindex(nλ0)-2 || throw(DimensionMismatch("lastindex(nλ0)-2 not equal to lastindex(d)"))
 
     # define the offset for the incident and substrate medium
     doffset = 200. # nm
