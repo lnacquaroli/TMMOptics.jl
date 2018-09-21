@@ -29,7 +29,7 @@ results = Spectra(λ, λ0, n, dflags, dinput, w, materials, θ, emfflag=0, h=1, 
   
 #### Reference wavelength
 
-`λ0` is the reference wavelength in nanometers, especially useful when computing mutlilayer stacks. It is used to plot the profile of index of refraction allowing to visualize the optical structure processed. Accepts floating numbers. For instance:
+`λ0` is the reference wavelength in nanometers, especially useful when computing mutlilayer stacks. It is used to compute the geometrical (physical) thickness of each layer and also to plot the profile of index of refraction allowing to visualize the optical structure processed. Accepts floating numbers. For instance:
 ```julia
 λ0 = 632.
 ```
