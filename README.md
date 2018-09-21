@@ -223,6 +223,26 @@ l4 = maxwellgarnettspheres(air(λ), gold(λ), f)
 
 Sources: [Theiss (1997)](https://www.sciencedirect.com/science/article/pii/S016757299600012X), [Torres-Costa et al. (2014)](https://www.sciencedirect.com/science/article/pii/B9780857097118500088), [Liu (2016](https://doi.org/10.1063/1.4943639), [Celzard et al. (2002)](https://doi.org/10.1016/S0008-6223(02)00196-3), [Urteaga et al. (2013)](https://dx.doi.org/10.1021/la304869y). See inside the module for more especific details.
 
+## Examples of useful plotting functions
+
+Included two types of plots so far are quite useful to visualize the type of structure being modeled.
+
+#### nplot.jl (using PyPlot)
+
+Example of plotting the index of refraction profile selected in `n`, usually for `λ0` (but could be different). This is particularly advantageous to visualize the chosen stack and track possible mistakes. For instance:
+```julia
+nplot(λ, results1.nλ0, results1.d, n, results1.emf, results1.ℓ, θ, λ0)
+```
+
+If `size(results.emf,1) > 1` prompts another plot with the EMF at `λ0` overlapping the structure.
+
+#### pbgplot.jl (using PyPlot)
+
+Example of plotting the photonic dispersion of DBRs. For instance:
+```julia
+pbgplot(λ, θ, results1.d, results1.Rp, results1.Rs, results1.R, results1.κp, results1.κs, results1.κ)
+```
+
 ## We welcome suggestions
 
 If you have ideas and suggestions to improve TMMOptics in Julia, PRs and issues are welcomed.
