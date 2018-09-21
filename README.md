@@ -171,7 +171,7 @@ By setting `θ` and `λ` as arrays with more than one element each, the quantiti
   
   `emf`: w averaged electric field distribution. 3d-array with lengths of `λ`, `θ`, and `ℓ`
   
-  `d`: thickness of each layer [nm]. Geometrical (physical) thickness of each layer as ordered by `n`. 1d-array with length of input `d`
+  `d`: geometrical (physical) thickness of each layer as ordered by `n`. 1d-array with length of input `d`
   
   `κp`: p-wave Bloch dispersion wavevectors. 2d-array with lengths of `λ` and `θ`
   
