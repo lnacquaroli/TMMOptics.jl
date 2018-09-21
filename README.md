@@ -64,7 +64,7 @@ d = [1/4 250. 1/2 980.]
 
 for a four layer system. Remember that `d` does not include information about the incident and substrate.
 
-#### Type of thickness profile
+#### Type of thickness in profile
 
 `dflags` tells the script to treat `d` as optical or geometrical thickness. This gives more flexibility to the computation and also allows to mix the `d` inputs. If the thickness input element is optical `dflags = 1`, or if it is geometrical `dflags = 0`. The number of elements of `dflags` must equal that of `d`. For instance, for the single layer example above:
 ```julia
