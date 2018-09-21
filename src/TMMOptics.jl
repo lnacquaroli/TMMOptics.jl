@@ -20,7 +20,7 @@ end
 
 function Spectra(λ::AbstractArray{A1,M1}, λ0::M7, n::AbstractArray{A2,M2}, dflags::AbstractArray{A3,M3}, dinput::AbstractArray{A4,M4}, w::A5, materials::AbstractArray{A6,M5}, θ::AbstractArray{A7,M6}, emfflag::A9=0, h::A10=1, pbgflag::A11=0) where {A1<:Number, M1, A2<:Number, M2, A3<:Number, M3, A4<:Number, M4, A5<:Number, M5, A6<:Number, M6, A7<:Number, A9<:Number, A10<:Number, A11<:Number, M7<:Number}
 
-    # Load usable variables, work in columns and radians
+    # Work in columns and radians
     λ = makecolumns(λ)
     θ = deg2rad.(θ)
     θ = makecolumns(θ)
@@ -34,8 +34,10 @@ function Spectra(λ::AbstractArray{A1,M1}, λ0::M7, n::AbstractArray{A2,M2}, dfl
     nθ = lastindex(θ)
 
     # Check variables sizes
-    @assert maximum(n) == size(materials,2) "The number of refractive indexes in the materials variable should be at least equal to the maximum value inside the media profile"
-    @assert nn-2 == lastindex(dflags) "Number of elements of the thickness vector must be equal to that of sequence vector minus two"
+    maximum(n) == size(materials,2) || throw(DimensionMismatch("the number of media (index of refraction) should be at least equal to the maximum value inside the sequence of media"))
+    lastindex(dflags) == lastindex(dinput) || throw(DimensionMismatch("lastindex(dflags) not equal to lastindex(d)"))
+    nn-2 == lastindex(dinput) || throw(DimensionMismatch("lastindex(n)-2 not equal to lastindex(dinput)"))
+    # nn-2 == lastindex(dflags) || throw(DimensionMismatch("lastindex(n)-2 not equal to lastindex(dflags)"))
 
     # Build the complex refractive index matrix for the whole structures
     nseq = Array{ComplexF64,2}(undef, (nλ, nn))
@@ -57,9 +59,9 @@ function Spectra(λ::AbstractArray{A1,M1}, λ0::M7, n::AbstractArray{A2,M2}, dfl
     nλ0 = nseq[idxλ0,:] # nice to return to plot the profile steps
 
     # Calculation of complex coefficients of reflection, transmission and emf
-    Rp, Rs, R, Tp, Ts, T, ρp, ρs, τp, τs, emfp, emfs, emf, ηp, ηs, δ = reflectiontransmissionemf(nseq, d, λ, θ, w, h, emfflag)
+    Rp, Rs, R, Tp, Ts, T, ρp, ρs, τp, τs, emfp, emfs, emf, ηp, ηs, δ = rtemf(nseq, d, λ, θ, w, h, emfflag)
 
-    # Provide the multilayer depth considering the h
+    # Provide the multilayer depth considering the h division
     temp1 = d / h
     temp2 = temp1 * ones.(1,h) # outer product
     # Cumulative dinput vector: this gives the final depth profile
@@ -93,7 +95,7 @@ makecolumns(x::Int64) = x
 """
 Function that calculates the reflection and transmission coefficients, their spectra and the EMF. In this function the electromagnetic field is calculated if emfflag = 1.
 """
-function reflectiontransmissionemf(nseq::AbstractArray{U,P}, d::AbstractArray{V,M}, λ::AbstractArray{V,O}, θ::AbstractArray{V,Q}, w::W, h::S, emfflag::S2) where {U<:ComplexF64, P, V<:Float64, M, O, Q, W<:Number, S<:Int64, S2<:Number}
+function rtemf(nseq::AbstractArray{U,P}, d::AbstractArray{V,M}, λ::AbstractArray{V,O}, θ::AbstractArray{V,Q}, w::W, h::S, emfflag::S2) where {U<:ComplexF64, P, V<:Float64, M, O, Q, W<:Number, S<:Int64, S2<:Number}
 
     nλ = lastindex(λ)
     nθ = lastindex(θ)
@@ -155,7 +157,7 @@ function reflectiontransmissionemf(nseq::AbstractArray{U,P}, d::AbstractArray{V,
 
     return Rp, Rs, R, Tp, Ts, T, ρp, ρs, τp, τs, emfp, emfs, emf, ηp, ηs, δ
 
-end # function reflectiontransmissionemf(...)
+end # function rtemf(...)
 
 """
 Computes the total transfer matrix, and admittance for the whole structure at each wavelenth and angle of incidence
