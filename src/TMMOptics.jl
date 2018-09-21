@@ -209,7 +209,7 @@ end # tmatrix(...)
 """
 Calculates the optical transfer matrix of a layer. φ: phase shift of the layer y: admittance of the layer, Τ: 2x2 optical tranfer matrix.
 """
-function Φ(φ::T1, y::T1) where {T1<:Number}
+function Φ(φ::T1, y::T1) where {T1<:ComplexF64}
     cosφ = cos.(φ)
     sinφ = sin.(φ)
     Τ = [cosφ (-im ./ y .* sinφ); (-im .* y .* sinφ) cosφ]
@@ -249,7 +249,7 @@ end # G(...)
 """
 Calculates the inverse of optical transfer matrix of a layer. φ:  phase shift of the layer, y: admittance of the layer, Τ: 2x2 optical tranfer matrix.
 """
-function Ξ(φ::T1, y::T1) where{T1<:Number}
+function Ξ(φ::T1, y::T1) where{T1<:ComplexF64}
     cosφ = cos.(φ)
     sinφ = sin.(φ)
     Τ = [cosφ (im ./ y .* sinφ); (im .* y .* sinφ) cosφ]
