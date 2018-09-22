@@ -1,4 +1,3 @@
-using TMMOptics: Spectra
 include("RIdb.jl") # collection of refractive indexes data
 using Main.RIdb: aluminum, air, bk7, chrome, dummy, glass, gold, silicon, silicontemperature, silver, sno2f, h2o, etoh
 include("MixingRules.jl") # collection of mixing rules for dielectric functions
