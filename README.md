@@ -1,5 +1,8 @@
 # TMMOptics.jl
 
+[![The MIT License](https://img.shields.io/badge/license-MIT-orange.svg?style=flat-square)](http://opensource.org/licenses/MIT)
+[![Build Status](https://travis-ci.com/lnacquaroli/TMMOptics.jl.svg?branch=master)](https://travis-ci.com/lnacquaroli/TMMOptics.jl)
+
 Simulation of the propagation of plane waves through arbitrary layered system of thin film stacks using optical matrices. Performs the calculation of reflectance, transmittance, absorptance, electromagnetic field and photonic band gap (for photonic crystals only) using the transfer matrix formalism. For further details see [https://arxiv.org/abs/1809.07708](https://arxiv.org/abs/1809.07708).
 
 TMMOptics.jl is compatible with Julia version 1.0 or later.
