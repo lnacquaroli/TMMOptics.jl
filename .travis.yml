@@ -1,8 +1,0 @@
-language: julia
-julia:
-  - nightly
-  - 1.0
-os:
-  - linux
-notifications:
-  - email: false
