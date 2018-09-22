@@ -1,7 +1,7 @@
 using TMMOptics: Spectra
-using Interpolations
-using PyPlot, PlotUtils,LaTeXStrings
-using LinearAlgebra
-using Printf: @sprintf
+import Interpolations
+import PyPlot, PlotUtils,LaTeXStrings
+import LinearAlgebra
+import Printf: @sprintf
 
 include("dbr.jl")
