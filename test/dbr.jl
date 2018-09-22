@@ -1,14 +1,4 @@
-#!/usr/bin/env julia
-
-clearconsole()
-
-# Workig directory
-path = "/home/leniac/JuliaLangDev/thin_film_optical_matrix/v0.5_julia_v1.0_compatible/"
-cd(path)
-
-# Load modules
-include("TMMOptics.jl") # main calculation program
-using Main.TMMOptics: Spectra
+using TMMOptics: Spectra
 include("RIdb.jl") # collection of refractive indexes data
 using Main.RIdb: aluminum, air, bk7, chrome, dummy, glass, gold, silicon, silicontemperature, silver, sno2f, h2o, etoh
 include("MixingRules.jl") # collection of mixing rules for dielectric functions
