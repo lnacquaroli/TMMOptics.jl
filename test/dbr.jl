@@ -2,8 +2,8 @@ include("RIdb.jl") # collection of refractive indexes data
 using Main.RIdb: aluminum, air, bk7, chrome, dummy, glass, gold, silicon, silicontemperature, silver, sno2f, h2o, etoh
 include("MixingRules.jl") # collection of mixing rules for dielectric functions
 using Main.MixingRules: bruggemanspheres, looyengacylinders, looyengaspheres, lorentzlorenz, maxwellgarnettspheres, monecke, gedf, gem
-include("nplot.jl")
-include("pbgplot.jl")
+#include("nplot.jl")
+#include("pbgplot.jl")
 
 # Wavelength range [nm]
 λ = 200:1:1000. # [730.]
@@ -34,50 +34,3 @@ pbgflag = 1
 
 # call main script
 results1 = Spectra(λ, λ0, n, dflag, d, w, materials, θ, emfflag, h, pbgflag)
-
-### Optional examples to plot results
-
-# plot the R, T and A spectra
-figure()
-plot(λ, results1.R, label="Reflectance")
-plot(λ, results1.T, label="Transmittance")
-plot(λ, 1 .- (results1.T + results1.R), label="Absorbance")
-legend(loc="best")
-ax1 = gca()
-ax1[:tick_params](which="both", direction="in", pad=10, labelsize=22) # ticks offset
-axis("tight")
-xlabel("Wavelength [nm]")
-ylabel("Reflectance")
-
-# plot the refractive index profile
-nplot(λ, results1.nλ0, results1.d, n, results1.emf, results1.ℓ, θ, λ0)
-
-# plot the EMF pattern
-emfield = log10.(Matrix(dropdims(results1.emf, dims=2)')) # surface plots cannot handle Adjoint yet
-figure()
-surface = contourf(λ, vec(results1.ℓ), emfield, 20)
-cb1_tags = floor.(LinRange(minimum(emfield), maximum(emfield), 5))
-cb1 = colorbar(surface, ticks=cb1_tags)
-cb1[:set_label]("EMF intensity")
-ax2 = gca()
-ax2[:tick_params](which="both", direction="in", pad=10, labelsize=22) # ticks offset
-axis("tight")
-xlabel("Wavelength [nm]")
-ylabel("Depth profile [nm]")
-
-# plot phase shift
-rdelta = real.(Matrix(dropdims(results1.δ, dims=2)')) # surface plots cannot handle Adjoint yet
-figure()
-d2 = [200; results1.d; 200] # add incident and subtrate media
-surface2 = contourf(λ, d2, rdelta, 20)
-cb2_tags = floor.(LinRange(minimum(rdelta), maximum(rdelta), 5))
-cb2 = colorbar(surface2, ticks=cb2_tags)
-cb2[:set_label]("EMF intensity")
-ax3 = gca()
-ax3[:tick_params](which="both", direction="in", pad=10, labelsize=22) # ticks offset
-axis("tight")
-xlabel("Wavelength [nm]")
-ylabel("Depth profile [nm]")
-
-# plot the photonic dispersion with custom function
-pbgplot(λ, θ, results1.d, results1.Rp, results1.Rs, results1.R, results1.κp, results1.κs, results1.κ)
