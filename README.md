@@ -186,7 +186,7 @@ By setting `θ` and `λ` as arrays with more than one element each, the quantiti
   
   `nλ0`: profile of index of refraction profile computed at the wavelength reference `λ0`. 1d-array with length of `n`
   
-  `δ`: phase shift of the whole structure. 3d-array with lengths `λ`, `θ`, and `d`
+  `δ`: phase shift of the whole structure, except the incident and substrate media. 3d-array with lengths `λ`, `θ`, and `lastindex(d)-2`
 
 ## RIdb.jl
 
