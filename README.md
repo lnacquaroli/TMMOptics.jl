@@ -100,7 +100,7 @@ w = 0.4 # mixes 60% of s-wave polarized light with 40% p-wave.
 
 #### Index of refraction data
 
-`materials` contains the index of refraction of the media used in the stack, while `n` keeps all the information about how these media will be placed in the whole structure. The idea is that we feed the script with the index if refraction as a function of `λ`. The `RIdb.jl` module holds a custom database with experimental data of index of refraction for different materials. The order of the index of refraction input in this variable are directly related to the element number inside the `n` profile. It is possible to create and input your own function with an index of refraction of your interest. For example in the single layer case we have:
+`materials` contains the index of refraction of the media used in the stack, while `n` keeps all the information about how these media will be placed in the whole structure. Each column represents an medium with its respective index of refraction. The idea is that we feed the script with the index if refraction as a function of `λ`. The `RIdb.jl` module holds a custom database with experimental data of index of refraction for different materials. The order of the index of refraction input in this variable are directly related to the element number inside the `n` profile. It is possible to create and input your own function with an index of refraction of your interest. For example in the single layer case we have:
 ```julia
 l1 = air(λ) # outermost medium
 l2 = chrome(λ) # active layer
