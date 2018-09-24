@@ -2,6 +2,3 @@ name = "TMMOptics"
 uuid = "54a582b6-bedd-11e8-3922-7944738450dd"
 authors = ["leniac "]
 version = "0.1.0"
-
-[deps]
-LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
