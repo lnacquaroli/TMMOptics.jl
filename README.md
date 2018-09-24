@@ -188,7 +188,7 @@ By setting `θ` and `λ` as arrays with more than one element each, the quantiti
   
   `δ`: phase shift of the whole structure, except the incident and substrate media. 3d-array with lengths `λ`, `θ`, and `lastindex(d)-2`
 
-## Examples of index of refraction fucntions used
+## Examples of index of refraction functions used
 
 The next two modules are optional since include functions with index of refraction information compiled for the purpose of the docs. They can also be used as provided for problems involving the same materials though.
 
