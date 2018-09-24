@@ -7,7 +7,7 @@ Simulation of the propagation of plane waves through arbitrary layered system of
 
 ## Installation
 
-This package is not yet registered. It can be installed in Julia with the following [see further](https://docs.julialang.org/en/v1/stdlib/Pkg/index.html#Adding-unregistered-packages-1):
+This package is not yet registered. It can be installed in Julia with the following ([see further](https://docs.julialang.org/en/v1/stdlib/Pkg/index.html#Adding-unregistered-packages-1)):
 ```julia
 julia> ]
 (v1.0) pkg> add https://github.com/lnacquaroli/TMMOptics.jl
@@ -25,7 +25,7 @@ The typical calling structure is as follow:
 results = Spectra(λ, λ0, n, dflags, d, w, materials, θ, emfflag=0, h=1, pbgflag=0)
 ```
 
-`Spectra` is the main function called from the module `TMMOptics.jl`. (See also `results`)
+`Spectra` is the main function called from the module `TMMOptics.jl`. (See also [`results`](https://github.com/lnacquaroli/TMMOptics.jl#output))
 
 ## Input
 
