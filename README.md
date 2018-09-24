@@ -156,45 +156,45 @@ By setting `θ` and `λ` as arrays with more than one element each, the quantiti
 
 `results` is a structure with type `Spectra` that contains the following fields computed by the main program:
 
-  `Rp`: p-wave complex reflectance. 2d-array with lengths of `λ` and `θ`
+  `Rp`: p-wave complex reflectance. `::Array{Float64}(lastindex(λ), lastindex(θ))`
   
-  `Rs`: s-wave complex reflectance. 2d-array with lengths of `λ` and `θ`
+  `Rs`: s-wave complex reflectance. `::Array{Float64}(lastindex(λ), lastindex(θ))`
   
-  `R`: w averaged reflectance. 2d-array with lengths of `λ` and `θ`
+  `R`: w averaged reflectance. `::Array{Float64}(lastindex(λ), lastindex(θ))`
   
-  `Tp`: p-wave complex transmittance. 2d-array with lengths of `λ` and `θ`
+  `Tp`: p-wave complex transmittance. `::Array{Float64}(lastindex(λ), lastindex(θ))`
   
-  `Ts`: s-wave complex transmittance. 2d-array with lengths of `λ` and `θ`
+  `Ts`: s-wave complex transmittance. `::Array{Float64}(lastindex(λ), lastindex(θ))`
   
-  `T`: w averaged transmittance. 2d-array with lengths of `λ` and `θ`
+  `T`: w averaged transmittance. `::Array{Float64}(lastindex(λ), lastindex(θ))`
   
-  `ρp`: p-wave complex reflection coefficient. 2d-array with lengths of `λ` and `θ`
+  `ρp`: p-wave complex reflection coefficient. `::Array{ComplexF64}(lastindex(λ), lastindex(θ))`
   
-  `ρs`: s-wave complex reflection coefficient. 2d-array with lengths of `λ` and `θ`
+  `ρs`: s-wave complex reflection coefficient. `::Array{ComplexF64}(lastindex(λ), lastindex(θ))`
   
-  `τp`: p-wave complex transmission coefficient. 2d-array with lengths of `λ` and `θ`
+  `τp`: p-wave complex transmission coefficient. `::Array{ComplexF64}(lastindex(λ), lastindex(θ))`
   
-  `τs`: s-wave complex transmission coefficient. 2d-array with lengths of `λ` and `θ`
+  `τs`: s-wave complex transmission coefficient. `::Array{ComplexF64}(lastindex(λ), lastindex(θ))`
   
-  `emfp`: p-wave electric field distribution. 3d-array with lengths of `λ`, `θ`, and `ℓ`
+  `emfp`: p-wave electric field distribution. `::Array{Float64}(lastindex(λ), lastindex(θ), lastindex(ℓ))`
   
-  `emfs`: s-wave electric field distribution. 3d-array with lengths of `λ`, `θ`, and `ℓ`
+  `emfs`: s-wave electric field distribution. `::Array{Float64}(lastindex(λ), lastindex(θ), lastindex(ℓ))`
   
-  `emf`: w averaged electric field distribution. 3d-array with lengths of `λ`, `θ`, and `ℓ`
+  `emf`: w averaged electric field distribution. `::Array{Float64}(lastindex(λ), lastindex(θ), lastindex(ℓ))`
   
-  `d`: geometrical (physical) thickness of each layer as ordered by `n`. 1d-array with length of input `d`
+  `d`: geometrical (physical) thickness of each layer as ordered by `n`. `::Array{Float64}(lastindex(d))`
   
-  `κp`: p-wave Bloch dispersion wavevectors. 2d-array with lengths of `λ` and `θ`
+  `κp`: p-wave Bloch dispersion wavevectors. `::Array{ComplexF64}(lastindex(λ), lastindex(θ))`
   
-  `κs`: s-wave Bloch dispersion wavevectors. 2d-array with lengths of `λ` and `θ`
+  `κs`: s-wave Bloch dispersion wavevectors. `::Array{ComplexF64}(lastindex(λ), lastindex(θ))`
   
-  `κ`: w averaged Bloch dispersion wavevectors. 2d-array with lengths of `λ` and `θ`
+  `κ`: w averaged Bloch dispersion wavevectors. `::Array{ComplexF64}(lastindex(λ), lastindex(θ))`
   
-  `ℓ`: depth profile in the multilayer stack taking into account `h` [nm]. Geometrical (physical) thickness of each layer, where each layer is divided into `h` sub-layers. 1d-array with length of `lastindex(d) * h`
+  `ℓ`: Geometrical (physical) thickness of each layer, where each layer is divided into `h` sub-layers [nm]. `::Array{Float64}(lastindex(d) * h)`
   
-  `nλ0`: profile of index of refraction profile computed at the wavelength reference `λ0`. 1d-array with length of `n`
+  `nλ0`: profile of index of refraction profile computed at the wavelength reference `λ0`. `::Array{Float64}(lastindex(n))`
   
-  `δ`: phase shift of the whole structure, except the incident and substrate media. 3d-array with lengths `λ`, `θ`, and `lastindex(d)-2`
+  `δ`: phase shift of the whole structure, except the incident and substrate media. `::Array{ComplexF64}(lastindex(λ), lastindex(θ), lastindex(d)-2)`
 
 ## Examples of index of refraction functions used
 
