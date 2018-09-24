@@ -5,6 +5,14 @@
 
 Simulation of the propagation of plane waves through arbitrary layered system of thin film stacks using optical matrices. Performs the calculation of reflectance, transmittance, absorptance, electromagnetic field and photonic band gap (for photonic crystals only) using the transfer matrix formalism. For further details see [https://arxiv.org/abs/1809.07708](https://arxiv.org/abs/1809.07708).
 
+## Installation
+
+This package is not yet registered. It can be installed in Julia with the following [see further](https://docs.julialang.org/en/v1/stdlib/Pkg/index.html#Adding-unregistered-packages-1):
+```julia
+julia> ]
+(v1.0) pkg> add https://github.com/lnacquaroli/TMMOptics.jl
+```
+
 TMMOptics.jl is compatible with Julia version 1.0 or later.
 
 If you want to avoid reading any further you can jump to the examples posted inside the examples folder.
