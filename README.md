@@ -188,7 +188,11 @@ By setting `θ` and `λ` as arrays with more than one element each, the quantiti
   
   `δ`: phase shift of the whole structure, except the incident and substrate media. 3d-array with lengths `λ`, `θ`, and `lastindex(d)-2`
 
-## RIdb.jl
+## Examples of index of refraction fucntions used
+
+The next two modules are optional since include functions with index of refraction information compiled for the purpose of the docs. They can also be used as provided for problems involving the same materials though.
+
+#### RIdb.jl
 
 Module containing a collection of functions with index of refration for the following materials: aluminum, air, bk7, chrome, dummy, glass, gold, silicon, silicontemperature, silver, sno2f, h2o, etoh. These functions accept as input arguments the wavelength range `λ`, and return the index of refraction as a complex floating number. Even for non-aborbent materials (where a list of zeros in the imaginary part is placed), the index works better with complex character. Users can use their own functions as well that output complex types though.
 
@@ -207,7 +211,7 @@ n = sno2f(λ)
 
 Data taken from database: https://refractiveindex.info, http://www.ioffe.ru/SVA/NSM/nk/, https://github.com/ulfgri/nk.
 
-## MixingRules.jl
+#### MixingRules.jl
 
 Module containing a collection of functions with effective index of refraction mixing rules for binary systems, accepting two indexes of refraction with the same lengths and the volume fraction of one of them.
 
