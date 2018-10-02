@@ -37,6 +37,7 @@ The `LightSource` type is exported by `TMMOptics.jl` to allow the creation of th
 
 This defines the wavelength range in nanometers, over which the calculations are performed. The accepted input values can be 1-d arrays or linear ranges, `λ::Array{Float64}`. For instance:
 ```julia
+λ = LinRange(200, 1000, 801) # this ensures floating input
 λ = 200:1000
 λ = [245. 300. 450. 868.]
 λ = [632.]
@@ -53,6 +54,7 @@ This parameter defines the reference wavelength in nanometers, especially useful
 
 Sets the angle of incidence (in degrees) of the wave into the first (incident) medium. It accepts the same type of input as `λ`, `θ::Array{Number}`. For instance:
 ```julia
+θ = LinRange(0, 90, 901) # this ensures floating input
 θ = [0.] # zero degress --> normal incidence
 θ = [45.] # 45. degrees
 θ = 0:1:60
