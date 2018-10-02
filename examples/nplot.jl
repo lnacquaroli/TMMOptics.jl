@@ -8,7 +8,7 @@ See examples folder for more details.
 using PyPlot, PlotUtils, LaTeXStrings
 using Printf: @sprintf
 
-function nplot(λ::AbstractArray{T,M}, nλ0::AbstractArray{U,N}, d::AbstractArray{V,O}, n::AbstractArray{W,P}, emf::AbstractArray{X,Q}, τ::AbstractArray{Y,R}, θ::AbstractArray{Z,S}, λ0::A2) where {T<:Number, M, U<:Number, N, V<:Number, O, W<:Number, P, X<:Number, Q, Y<:Number, R, Z<:Number, S, A1<:Number, A2<:Number}
+function nplot(λ::AbstractArray{T1,N1}, θ::AbstractArray{T2,N2}, λ0::T3, d::AbstractArray{T3,N4}, τ::AbstractArray{T4,N5}, emf::AbstractArray{T3,N6}, nλ0::AbstractArray{T5,N7}, n) where {T1<:Number, N1, T2<:Number, N2, T3<:Float64, N4, T4<:Float64, N5, N6, T5<:ComplexF64, N7}
 
     # check input
     nn = lastindex(n)
@@ -79,7 +79,7 @@ function nplot(λ::AbstractArray{T,M}, nλ0::AbstractArray{U,N}, d::AbstractArra
             # plot the emf for the reference wavelength
             aux1 = findmin(abs.(λ .- λ0))[2][1]
             plot(τ, emf[aux1, 1, :])
-            title((@sprintf "EMF-highest resonance at %0.0f [nm]" λ[aux1]), y=1.02)
+            title((@sprintf "EMF-resonance at %0.0f [nm]" λ[aux1]), y=1.02)
 
         end # if (length(λ) == 1) | (length(θ) == 1)
     end # size(emf,1) > 1

@@ -17,7 +17,7 @@ function bruggemanspheres(n1::AbstractArray{T,N}, n2::AbstractArray{T,N}, p::S) 
     df1 = n1.^2
     df2 = n2.^2
     # effective dielectric function: PHYSICAL REVIEW B VOLUME 61, NUMBER 15 15 APRIL 2000-I. solved with mathematica for dfeff.
-    dfeff = 0.25 .* (-df1 + 2 .* df2 + 3 .* df1.*p - 3 .* df2 .* p + sqrt( 8 .* df1 .* df2 + (-df1 + 2 .* df2 + 3 .* df1.*p - 3 .* df2 .* p).^2 ) )
+    dfeff = 0.25 .* (-df1 + 2 .* df2 + 3 .* df1.*p - 3 .* df2 .* p + sqrt.( 8 .* df1 .* df2 + (-df1 + 2 .* df2 + 3 .* df1.*p - 3 .* df2 .* p).^2 ) )
     # compute effective refractive index
     neff = dfeff.^0.5
     return neff
