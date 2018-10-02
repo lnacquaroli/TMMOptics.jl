@@ -1,3 +1,5 @@
-using TMMOptics: Spectra
+using TMMOptics
+using Test
 
-include("dbr.jl")
+# write your own tests here
+@test 1 == 2
