@@ -22,28 +22,45 @@ If you want to avoid reading any further you can jump to the examples posted ins
 The typical calling structure is as follow:
 
 ```julia
-results = Spectra(λ, λ0, n, dflags, d, w, materials, θ, emfflag=0, h=1, pbgflag=0)
+results = thinfilmoptics(beam, nseq, emfflag=0, h=1, pbgflag=0)
 ```
 
-`Spectra` is the main function called from the module `TMMOptics.jl`. (See also [`results`](https://github.com/lnacquaroli/TMMOptics.jl#output))
+Where `thinfilmoptics` is the main function called from the module `TMMOptics.jl`.
 
 ## Input
 
+### LightSource type
+
+The `LightSource` type is exported by `TMMOptics.jl` to allow the creation of the source type with useful parameters. At the moment the only subtype accepted is `PlaneWave{λ, λ0, θ, p} <: LightSource`.
+
 #### Wavelength range
 
-`λ::Array{Float64}` is the wavelenth range in nanometers. The accepted input values can be 1-d array or linear ranges. For instance:
+This defines the wavelength range in nanometers, over which the calculations are performed. The accepted input values can be 1-d arrays or linear ranges, `λ::Array{Float64}`. For instance:
 ```julia
 λ = 200:1000
 λ = [245. 300. 450. 868.]
 λ = [632.]
 ```
-  
+
 #### Reference wavelength
 
-`λ0::Float64` is the reference wavelength in nanometers, especially useful when computing mutlilayer stacks. It is used to compute the geometrical (physical) thickness of each layer and also to plot the profile of index of refraction allowing to visualize the optical structure processed. Accepts floating numbers. For instance:
+This parameter defines the reference wavelength in nanometers, especially useful when computing mutlilayer stacks. It is used to compute the geometrical (physical) thickness of each layer and also to plot the profile of index of refraction allowing to visualize the optical structure processed. Accepts floating numbers, `λ0::Float64`. For instance:
 ```julia
 λ0 = 632.
 ```
+
+#### Angle of incidence
+
+Sets the angle of incidence (in degrees) of the wave into the first (incident) medium. It accepts the same type of input as `λ`, `θ::Array{Number}`. For instance:
+```julia
+θ = [0.] # zero degress --> normal incidence
+θ = [45.] # 45. degrees
+θ = 0:1:60
+```
+
+By setting `θ` and `λ` as arrays with more than one element each, the quantities that depends on them will be output as 2d-array or 3d-array.
+
+
 
 #### Layers profile
 
@@ -129,16 +146,6 @@ where the incident material is air and the substrate is silicon. The number `2` 
 
 The number of materials included here should be at least equal to the maximum element in `n`. You can put more if you know where to place them, but not less `maximum(n) == size(materials,2)`.
 
-#### Angle of incidence
-
-`θ::Array{Number}` is an 1d-array that set the angle of incidence of the wave into the first (incident) medium. It accepts the same type of input as `λ`, in degrees. For instance:
-```julia
-θ = [0.] # zero degress --> normal incidence
-θ = [45.] # 45. degrees
-θ = 0:1:60
-```
-
-By setting `θ` and `λ` as arrays with more than one element each, the quantities that depends on them will be output as 2d-array or 3d-array.
 
 #### Electromagnetic field (EMF) flag
 
