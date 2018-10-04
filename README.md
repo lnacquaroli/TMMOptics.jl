@@ -27,15 +27,15 @@ results = thinfilmoptics(beam, nseq, emfflag=0, h=1, pbgflag=0)
 
 Where `thinfilmoptics` is the main function called from the module `TMMOptics.jl`.
 
-## Input
+## Input arguments
 
 ### LightSource type
 
-The `LightSource` type is exported by `TMMOptics.jl` to allow the creation of the source type with useful parameters. At the moment the only subtype accepted is `PlaneWave{λ, λ0, θ, p} <: LightSource`.
+`beam::PlaneWave` is a subtype that defines the type of light source used in the simulation. At the moment the only subtype accepted is `PlaneWave <: LightSource`, which is exported by `TMMOptics.jl`. To call this subtype we can write `beam = PlaneWave(λ, λ0, θ, p)`, where the parameters required are described below.
 
 #### Wavelength range
 
-This defines the wavelength range in nanometers, over which the calculations are performed. The accepted input values can be 1-d arrays or linear ranges, `λ::Array{Float64}`. For instance:
+`λ` defines the wavelength range in nanometers, over which the calculations are performed. The recommended input are 1-d arrays, linear or step ranges (although not explicitly defined). For instance:
 ```julia
 λ = LinRange(200, 1000, 801) # this ensures floating input
 λ = 200:1000
@@ -45,14 +45,14 @@ This defines the wavelength range in nanometers, over which the calculations are
 
 #### Reference wavelength
 
-This parameter defines the reference wavelength in nanometers, especially useful when computing mutlilayer stacks. It is used to compute the geometrical (physical) thickness of each layer and also to plot the profile of index of refraction allowing to visualize the optical structure processed. Accepts floating numbers, `λ0::Float64`. For instance:
+`λ0::Float64` sets the reference wavelength in nanometers, especially useful when computing mutlilayer stacks. It is used to compute the geometrical (physical) thickness of each layer and also to plot the profile of index of refraction allowing to visualize the optical structure processed. Accepts floating numbers. For instance:
 ```julia
 λ0 = 632.
 ```
 
 #### Angle of incidence
 
-Sets the angle of incidence (in degrees) of the wave into the first (incident) medium. It accepts the same type of input as `λ`, `θ::Array{Number}`. For instance:
+`θ` defines the angle of incidence (in degrees) of the wave into the first (incident) medium. It accepts the same type of input as `λ`. For instance:
 ```julia
 θ = LinRange(0, 90, 901) # this ensures floating input
 θ = [0.] # zero degress --> normal incidence
@@ -62,148 +62,123 @@ Sets the angle of incidence (in degrees) of the wave into the first (incident) m
 
 By setting `θ` and `λ` as arrays with more than one element each, the quantities that depends on them will be output as 2d-array or 3d-array.
 
-
-
-#### Layers profile
-
-`n::Array{Int64}` is an 1d-array setting the sequence of index of refraction that composes the multilayer stack. The order set here will be used to alternate the layers of media selected below in materials. The first element indicates the incident medium while the last one the substrate. For instance, in the case of simulation a single layer configuration:
-```julia
-n = [1 2 3]
-```
-which indicates that the incident medium is layer number 1 and the substrate is layer 3. The second layer, number 2, is the layer of interest. For a multilayer stack ([Distributed Bragg Reflector](https://en.wikipedia.org/wiki/Distributed_Bragg_reflector)) alternating two different index of refraction materials 1 and 2, wrapped inside an incident medium 1 and a substrate 4, we can write:
-```julia
-n = [1 2 3 2 3 2 3 2 3 2 3 2 3 4]
-```
-
-#### Type of thickness in profile
-
-`dflags::Array{Number}` tells the script to treat `d` as optical or geometrical thickness. This gives more flexibility to the computation and also allows to mix the `d` inputs. If the thickness input element is optical `dflags = 1`, or if it is geometrical `dflags = 0`. The number of elements of `dflags` must equal that of `d`. For instance, for the single layer example above:
-```julia
-dflags = [0]
-```
-
-while for the DBR:
-```julia
-dflags = ones.(lastindex(n)-2,1)
-```
-or
-```julia
-dflags = ones.(lastindex(d),1)
-```
-
-In the case of mixing flags input, we can write:
-```julia
-dflags = [1 0 1 0]
-```
-
-#### Thickness profile
-
-`d::Aray{Float64}` is an 1d-array setting the thickness of each layer inside the multilayer stack, which accepts two types of input: the geometrical (physical) thickness in nanometers, or the fraction of optical thickness (product of the index of refraction at the wavelength of reference times the geometrical thickness) at the wavelength of reference `λ0`. The latter is useful when computing multilayer stacks and normally using quarter-wavelength or half-wavelength thicknesses. The elements of this array contains information about all the layers inside the multilayer, except the first and last ones (semi-infinite calculation). For instance, for the single layer example, we have
-```julia
-d = [648.]
-```
-
-while for the DBR, we can set the whole stack to have quarter-wavelength optical thickness as follow:
-```julia
-d = 1/4 * ones.(lastindex(n)-2,1)
-```
-
-It is also accepted to mixed both type of input here. We can set for instance:
-```julia
-d = [1/4 250. 1/2 980.]
-```
-
-for a four layer system. Remember that `d` does not include information about the incident and substrate.
-
 #### Polarization of the wave
 
-`w::Number` indicates the polarization (linear polarization) of the wave. Accepted values are `w = 1` for the p-wave (TM), and `w = 0` for the s-wave (TE). An option to calculate quantities with intermediate values, `0 < w < 1` is accepted as well. The relevance of this parameter is subject to `θ != 0`, otherwise, there is no polarization effect. Floating values are recommended for this input. E.g.:
+`p::Float64` indicates the polarization (linear polarization) of the wave. Accepted values are `p = 1` for the p-wave (TM), and `p = 0` for the s-wave (TE). In fact, the program computes both types at every run, so this parameter comes actually useful when is set to intermediate values, `0 < p < 1`, so quantities are averaged in `p`. The relevance of this parameter is subject to `θ != 0`, otherwise, there is no polarization effect. Floating values are recommended for this input. E.g.:
 ```julia
-w = 1. # p-wave
-w = 0. # s-wave
-w = 0.5
-w = 0.4 # mixes 60% of s-wave polarized light with 40% p-wave.
+p = 1. # p-wave
+p = 0. # s-wave
+p = 0.5
+p = 0.4 # mixes 60% of s-wave polarized light with 40% p-wave.
 ```
 
-#### Index of refraction data
+### Materials type
 
-`materials::Array{ComplexF64}` contains the index of refraction of the media used in the stack, while `n` keeps all the information about how these media will be placed in the whole structure. Each column represents an medium with its respective index of refraction. The idea is that we feed the script with the index if refraction as a function of `λ`. The `RIdb.jl` module holds a custom database with experimental data of index of refraction for different materials. The order of the index of refraction input in this variable are directly related to the element number inside the `n` profile. It is possible to create and input your own function with an index of refraction of your interest. For example in the single layer case we have:
+`nseq::Array{Materials}` is an array setting the sequence of the materials involved in the simulation, containing the information about the index of refraction and the thickness and type of thickness that compose the multilayer stack. The order set here will be used to alternate the layers in the multilayer.
+
+The `Material` supertype allows two subtypes exported by `TMMOptics.jl`. The first one is `Geometrical(n, d)`, which is used to indicate an input layer with its complex index of refraction `n`and geometrical (physical) thickness `d` in nanometers. The other subtype allowed is `Optical(n, f)`, which is used to construct a layer with refractive `n` and the fraction of optical thickness at `beam.λ0`. The last one is useful for multilayer stacks normally written in terms of quarter/half-wave layers. Both subtypes can be mixed when defining the structure.
+
+The first element in `nseq` indicates the incident medium while the last one the substrate. For instance, in the case of simulation a single layer configuration:
 ```julia
-l1 = air(λ) # outermost medium
-l2 = chrome(λ) # active layer
-l3 = silicon(λ) # substrate medium
-materials = [l1 l2 l3]
+l0 = Geometrical(air(beam.λ), 0.) # incident medium
+l1 = Geometrical(sno2f(beam.λ), 150.)
+l2 = Geometrical(silicon(beam.λ), 0.) # subtrate
+nseq = [l0 l1 l2]
 ```
 
-where the first material (`air`, `l1`) is the incident medium and the third material (`silicon`, `l3`) is the substrate. The second material is the active layer `l2`. To understand the relation with `n`, `l1` will be placed in the structure where the number `1`is located inside `n`, while `l2` will be placed at `2`, and `l3` at `3`. When it comes to a DBR, alternating two indexes of refraction, we can write as follow:
+For a multilayer stack ([Distributed Bragg Reflector](https://en.wikipedia.org/wiki/Distributed_Bragg_reflector)) alternating two different index of refraction materials 1 and 2, wrapped inside an incident medium 1 and a substrate 4, we can write:
 ```julia
-l1 = air(λ) # outermost medium
-l2 = looyengaspheres(air(λ),silicon(λ),0.86)
-l3 = looyengaspheres(air(λ),silicon(λ),0.54)
-l4 = silicon(λ) # substrate medium
-materials = [l1 l2 l3 l4]
+l0 = Geometrical(air(beam.λ), 0.)
+l1 = Optical(looyengaspheres(air(beam.λ),silicon(beam.λ),0.54), 1/4.)
+l2 = Optical(looyengaspheres(air(beam.λ),silicon(beam.λ),0.86), 1/4.)
+l3 = Geometrical(silicon(beam.λ), 0.)
+nseq = [l0 l1 l2 l1 l2 l1 l2 l1 l2 l1 l2 l1 l2 l1 l2 l1 l2 l3]
 ```
 
-where the incident material is air and the substrate is silicon. The number `2` is a medium with index of refractive index in terms of Looyenga mixing rule with 0.86 porosity, and `3` with 0.54 porosity mixing air and silicon. Note here that `l2` will be placed inside the structure where there is a number `2` in `n`, `l3` will be placed where there is a `3` in `n`. This way of writing `n` and `materials` makes suitable to make cleaner input, especially when you want to compute multilayer stacks with lots of layers.
+where `l1` and `l2` are quarter-wave optical thickness at the reference wavelength `λ0`.
 
-The number of materials included here should be at least equal to the maximum element in `n`. You can put more if you know where to place them, but not less `maximum(n) == size(materials,2)`.
+The thicknesses of the first and last layers are not taken into account as the calculations are performed for semi-infinite incident/substrate media, so we just put a zero regardless of the subtype.
 
 
-#### Electromagnetic field (EMF) flag
+### Electromagnetic field (EMF) flag
 
-`emfflag::Number` is a flag that indicates whether to compute the field distribution inside the multilayer or not. If `emfflag = 1`, the elecromagnetic field is computed, while if `emfflag = 0` is not. This is useful especially when you just want the reflectance or transmission spectra information but not the field distribution, because the computation might be time consuming. The default value is `0`.
+`emfflag::Int64` is a flag that indicates whether to compute the field distribution inside the multilayer or not. If `emfflag = 1`, the elecromagnetic field is computed, while if `emfflag = 0` is not. This is useful especially when you just want the reflectance or transmission spectra information but not the field distribution, because the computation might be time consuming. The default value is `0`.
 
-#### Number of layers division
+### Number of layers division for EMF calculation
 
-`h::Number` is a floating number that tells in how many sub-layers the script will use to calculate the EMF. If you opted for `emfflag = 1` then you might want to set this to, say `10` to better visualize the field distribution. You can think as to have more numerical resolution. The default value is `1`. If you choose `emfflag = 0`, then `h` is neglected.
+`h::Int64` set the number of sub-layers the script will use to divide each layer defined in `nseq` to calculate the EMF. If you opted for `emfflag = 1` then you might want to set this to, say `10` to better visualize the field distribution. You can think as to have more numerical resolution when increasing `h`. The default value is `1`. If you choose `emfflag = 0`, then `h` is neglected.
 
-#### Photonic band gap flag
+### Photonic band gap flag
 
-`pbgflag::Number` indicates whether to calculate or not the photonic dispersion. It is only useful when computing DBR, i.e., when computing binary periodic systems that alternate two different refractive indexes. By default `pbgflag = 0`.
+`pbgflag::Int64` indicates whether to calculate or not the photonic dispersion. It is only useful when computing DBR, i.e., when computing binary periodic systems that alternate two different refractive indexes. By default `pbgflag = 0`.
 
 ## Output
 
-`results::Spectra` is a structure with type `Spectra` that contains the following fields computed by the main program:
+`results::Results <: Output` is a structure containing different subtypes of outputs depending on their relation (more or less). There are five subtypes included in the output:
 
-  `Rp::Array{Float64}(lastindex(λ), lastindex(θ))`: p-wave reflectance.
+### Spectra subtype of output
+
+`results.Spectra::Results <: Output` contains information on the reflectance, transmittance and fresnell coefficients spectra. Inside this subtype there exist the following fields:
+
+`Rp::Array{Float64}(lastindex(beam.λ), lastindex(beam.θ))`: p-wave reflectance.
+
+`Rs::Array{Float64}(lastindex(beam.λ), lastindex(beam.θ))`: s-wave reflectance.
+
+`R::Array{Float64}(lastindex(beam.λ), lastindex(beam.θ))`: w averaged reflectance
+
+`Tp::Array{Float64}(lastindex(beam.λ), lastindex(beam.θ))`: p-wave transmittance.
   
-  `Rs::Array{Float64}(lastindex(λ), lastindex(θ))`: s-wave reflectance.
+`Ts::Array{Float64}(lastindex(beam.λ), lastindex(beam.θ))`: s-wave transmittance.
+ 
+`T::Array{Float64}(lastindex(beam.λ), lastindex(beam.θ))`: w averaged transmittance.
   
-  `R::Array{Float64}(lastindex(λ), lastindex(θ))`: w averaged reflectance
+`ρp::Array{ComplexF64}(lastindex(beam.λ), lastindex(beam.θ))`: p-wave complex reflection coefficient.
   
-  `Tp::Array{Float64}(lastindex(λ), lastindex(θ))`: p-wave transmittance.
+`ρs::Array{ComplexF64}(lastindex(beam.λ), lastindex(beam.θ))`: s-wave complex reflection coefficient.
   
-  `Ts::Array{Float64}(lastindex(λ), lastindex(θ))`: s-wave transmittance.
+`τp::Array{ComplexF64}(lastindex(beam.λ), lastindex(beam.θ))`: p-wave complex transmission coefficient.
   
-  `T::Array{Float64}(lastindex(λ), lastindex(θ))`: w averaged transmittance.
+`τs::Array{ComplexF64}(lastindex(beam.λ), lastindex(beam.θ))`: s-wave complex transmission coefficient.
+
+### Field subtype of output
+
+`results.Field::Results <: Output` contains information on the electromagnetic field distribution calculated, with the following fields:
+
+`emfp::Array{Float64}(lastindex(beam.λ), lastindex(beam.θ), lastindex(results.Misc.ℓ))`: p-wave electric field distribution.
   
-  `ρp::Array{ComplexF64}(lastindex(λ), lastindex(θ))`: p-wave complex reflection coefficient.
+`emfs::Array{Float64}(lastindex(beam.λ), lastindex(beam.θ), lastindex(results.Misc.ℓ))`: s-wave electric field distribution.
   
-  `ρs::Array{ComplexF64}(lastindex(λ), lastindex(θ))`: s-wave complex reflection coefficient.
-  
-  `τp::Array{ComplexF64}(lastindex(λ), lastindex(θ))`: p-wave complex transmission coefficient.
-  
-  `τs::Array{ComplexF64}(lastindex(λ), lastindex(θ))`: s-wave complex transmission coefficient.
-  
-  `emfp::Array{Float64}(lastindex(λ), lastindex(θ), lastindex(ℓ))`: p-wave electric field distribution.
-  
-  `emfs::Array{Float64}(lastindex(λ), lastindex(θ), lastindex(ℓ))`: s-wave electric field distribution.
-  
-  `emf::Array{Float64}(lastindex(λ), lastindex(θ), lastindex(ℓ))`: w averaged electric field distribution.
-  
-  `d::Array{Float64}(lastindex(d))`: geometrical (physical) thickness of each layer as ordered by `n`.
-  
-  `κp::Array{ComplexF64}(lastindex(λ), lastindex(θ))`: p-wave Bloch dispersion wavevectors.
-  
-  `κs::Array{ComplexF64}(lastindex(λ), lastindex(θ))`: s-wave Bloch dispersion wavevectors.
-  
-  `κ::Array{ComplexF64}(lastindex(λ), lastindex(θ))`: w averaged Bloch dispersion wavevectors.
-  
-  `ℓ::Array{Float64}(lastindex(d)*h)`: Geometrical (physical) thickness of each layer, where each layer is divided into `h` sub-layers [nm].
-  
-  `nλ0::Array{Float64}(lastindex(n))`: profile of index of refraction profile computed at the wavelength reference `λ0`.
-  
-  `δ::Array{ComplexF64}(lastindex(λ), lastindex(θ), lastindex(d)-2)`: phase shift of the whole structure, except the incident and substrate media.
+`emf::Array{Float64}(lastindex(beam.λ), lastindex(beam.θ), lastindex(results.Misc.ℓ))`: w averaged electric field distribution.
+
+### Bloch subtype of output
+
+`results.Bloch::Results <: Output` contains information on the Bloch wavevectors calculated for DBRs, with the following fields:
+
+`κp::Array{ComplexF64}(lastindex(beam.λ), lastindex(beam.θ))`: p-wave Bloch dispersion wavevectors.
+
+`κs::Array{ComplexF64}(lastindex(beam.λ), lastindex(beam.θ))`: s-wave Bloch dispersion wavevectors.
+
+`κ::Array{ComplexF64}(lastindex(beam.λ), lastindex(beam.θ))`: w averaged Bloch dispersion wavevectors.
+
+### Misc subtype of output
+
+`results.Misc::Results <: Output` gives information about the geometrical (physical) thicknesses in nanometers (even if you input the optical thickness information, the output returns the physical one), the geometrical thickness taking into account the `h` number defined above, and the index of refraction of each layer defined in `nseq` at the wavelength of reference `λ0`. The fields are as follow:
+
+`d::Array{Float64}(size(nseq,2)-2)`: geometrical (physical) thickness of each layer as ordered by `n` [nm].
+
+`ℓ::Array{Float64}((size(nseq,2)-2)*h)`: Geometrical (physical) thickness of each layer, where each layer is divided into `h` sub-layers [nm].
+
+`nλ0::Array{Float64}(size(nseq,2))`: profile of index of refraction profile computed at the wavelength reference `λ0`.
+
+### AdmPhase subtype of output
+
+`results.AdmPhase::Results <: Output` wraps the :
+
+`ηp::Array{ComplexF64}(lastindex(beam.λ), lastindex(beam.θ), lastindex(size(nseq,2)))`: p-wave admittance of the structure.
+
+`ηs::Array{ComplexF64}(lastindex(beam.λ), lastindex(beam.θ), lastindex(size(nseq,2)))`: s-wave admittance of the structure.
+
+`δ::Array{ComplexF64}(lastindex(beam.λ), lastindex(beam.θ), lastindex(size(nseq,2))-2)`: phase shift (thickness) of the structure without the incident and substrate media.
 
 ## Examples of index of refraction functions used
 
@@ -226,7 +201,7 @@ n = silicontemperature(λ, t)
 n = sno2f(λ)
 ```
 
-Data taken from database: https://refractiveindex.info, http://www.ioffe.ru/SVA/NSM/nk/, https://github.com/ulfgri/nk.
+Data taken from database: https://refractiveindex.info, http://www.ioffe.ru/SVA/NSM/nk/, https://github.com/ulfgri/nk. You have to check the range of validity for the wavelength of each index.
 
 #### MixingRules.jl
 
@@ -255,7 +230,7 @@ Included two types of plots so far are quite useful to visualize the type of str
 
 Example of plotting the index of refraction profile selected in `n`, usually for `λ0` (but could be different). This is particularly advantageous to visualize the chosen stack and track possible mistakes. For instance:
 ```julia
-nplot(λ, results1.nλ0, results1.d, n, results1.emf, results1.ℓ, θ, λ0)
+nplot(beam.λ, beam.θ, beam.λ0, results.Misc.d, results.Misc.ℓ, results.Field.emf, results.Misc.nλ0, nseq)
 ```
 
 If `size(results.emf,1) > 1` prompts another plot with the EMF at `λ0` overlapping the structure.
@@ -264,7 +239,7 @@ If `size(results.emf,1) > 1` prompts another plot with the EMF at `λ0` overlapp
 
 Example of plotting the photonic dispersion of DBRs. For instance:
 ```julia
-pbgplot(λ, θ, results1.d, results1.Rp, results1.Rs, results1.R, results1.κp, results1.κs, results1.κ)
+pbgplot(beam.λ, beam.θ, results.Misc.d, results.Spectra.Rp, results.Spectra.Rs, results.Spectra.R, results.Bloch.κp, results.Bloch.κs, results.Bloch.κ)
 ```
 
 ## We welcome suggestions
@@ -273,24 +248,28 @@ If you have ideas and suggestions to improve TMMOptics in Julia, PRs and issues 
 
 ## Other projects in optics (not necessarily in Julia)
 
-[https://github.com/ngedwin98/ABCDBeamTrace.jl](https://github.com/ngedwin98/ABCDBeamTrace.jl)
+* [https://github.com/ngedwin98/ABCDBeamTrace.jl](https://github.com/ngedwin98/ABCDBeamTrace.jl)
 
-[https://github.com/lbolla/EMpy](https://github.com/lbolla/EMpy)
+* [https://github.com/lbolla/EMpy](https://github.com/lbolla/EMpy)
 
-[https://github.com/ederag/geoptics](https://github.com/ederag/geoptics)
+* [https://github.com/ederag/geoptics](https://github.com/ederag/geoptics)
 
-[https://ricktu288.github.io/ray-optics/simulator/](https://ricktu288.github.io/ray-optics/simulator/)
+* [https://ricktu288.github.io/ray-optics/simulator/](https://ricktu288.github.io/ray-optics/simulator/)
 
-[https://github.com/brownjm/geometric-optics](https://github.com/brownjm/geometric-optics)
+* [https://github.com/brownjm/geometric-optics](https://github.com/brownjm/geometric-optics)
 
-[https://github.com/NGC604/thinerator](https://github.com/NGC604/thinerator)
+* [https://github.com/NGC604/thinerator](https://github.com/NGC604/thinerator)
 
-[https://github.com/marcus-cmc/Optical-Modeling](https://github.com/marcus-cmc/Optical-Modeling)
+* [https://github.com/marcus-cmc/Optical-Modeling](https://github.com/marcus-cmc/Optical-Modeling)
 
-[http://opticspy.org/](http://opticspy.org/)
+* [http://opticspy.org/](http://opticspy.org/)
 
-[https://github.com/Bitburg-chef/WavefrontOptics](https://github.com/Bitburg-chef/WavefrontOptics)
+* [https://github.com/Bitburg-chef/WavefrontOptics](https://github.com/Bitburg-chef/WavefrontOptics)
 
-[https://github.com/jlcodona/AOSim2](https://github.com/jlcodona/AOSim2)
+* [https://github.com/jlcodona/AOSim2](https://github.com/jlcodona/AOSim2)
 
-[https://github.com/stevengj/meep](https://github.com/stevengj/meep)
+* [https://github.com/stevengj/meep](https://github.com/stevengj/meep)
+
+## To do
+
+* Rugate filters
