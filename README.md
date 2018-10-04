@@ -74,17 +74,23 @@ p = 0.4 # mixes 60% of s-wave polarized light with 40% p-wave.
 
 ### Materials type
 
-`nseq::Array{Materials}` is an array setting the sequence of the materials involved in the simulation, containing the information about the index of refraction and the thickness and type of thickness that compose the multilayer stack. The order set here will be used to alternate the layers in the multilayer.
-
 The `Material` supertype allows two subtypes exported by `TMMOptics.jl`. The first one is `Geometrical(n, d)`, which is used to indicate an input layer with its complex index of refraction `n`and geometrical (physical) thickness `d` in nanometers. The other subtype allowed is `Optical(n, f)`, which is used to construct a layer with refractive `n` and the fraction of optical thickness at `beam.λ0`. The last one is useful for multilayer stacks normally written in terms of quarter/half-wave layers. Both subtypes can be mixed when defining the structure.
 
-The first element in `nseq` indicates the incident medium while the last one the substrate. For instance, in the case of simulation a single layer configuration:
+`nseq::Array{Materials}` is an array setting the sequence of the materials involved in the simulation, containing the information about the index of refraction and the thickness and type of thickness that compose the multilayer stack. The order set here will be used to alternate the layers in the multilayer.
+
+The first element in `nseq` indicates the incident medium while the last one the substrate. 
+
+#### Geometrical subtype
+
+For instance, in the case of simulation a single layer configuration:
 ```julia
 l0 = Geometrical(air(beam.λ), 0.) # incident medium
 l1 = Geometrical(sno2f(beam.λ), 150.)
 l2 = Geometrical(silicon(beam.λ), 0.) # subtrate
 nseq = [l0 l1 l2]
 ```
+
+#### Optical subtype
 
 For a multilayer stack ([Distributed Bragg Reflector](https://en.wikipedia.org/wiki/Distributed_Bragg_reflector)) alternating two different index of refraction materials 1 and 2, wrapped inside an incident medium 1 and a substrate 4, we can write:
 ```julia
@@ -97,8 +103,7 @@ nseq = [l0 l1 l2 l1 l2 l1 l2 l1 l2 l1 l2 l1 l2 l1 l2 l1 l2 l3]
 
 where `l1` and `l2` are quarter-wave optical thickness at the reference wavelength `λ0`.
 
-The thicknesses of the first and last layers are not taken into account as the calculations are performed for semi-infinite incident/substrate media, so we just put a zero regardless of the subtype.
-
+For all cases, the thicknesses of the first and last layers are not taken into account as the calculations are performed for semi-infinite incident/substrate media, so we just put a zero regardless of the subtype.
 
 ### Electromagnetic field (EMF) flag
 
