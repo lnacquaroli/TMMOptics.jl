@@ -1,3 +1,3 @@
-using TMMOptics: Spectra
+using TMMOptics
 
-include("dbr.jl")
+include("testSingleLayer.jl")

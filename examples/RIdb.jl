@@ -8,16 +8,16 @@ export aluminum, air, bk7, chrome, dummy, glass, gold, silicon, silicontemperatu
 file = "RefractiveIndexDB.h5"
 
 function air(λ::AbstractArray{T,M}) where {T<:Number, M}
-    N = 1.00029 * ones.(lastindex(λ)) + im .* zeros.(lastindex(λ))
+    N::Array{ComplexF64} = 1.00029 * ones.(lastindex(λ)) + im .* zeros.(lastindex(λ))
 end
 
 function dummy(λ::AbstractArray{T,N}, x::S, y::S) where {T<:Number, N, S<:Number}
-    Nc = ones.(length(λ)) .* (x + im*y)
+    Nc::Array{ComplexF64} = ones.(length(λ)) .* (x + im*y)
 end # EOF dummy(...)
 
 #http://www.cvilaser.com/PublicPages/Pages/TechnicalTips.aspx
 function glass(λ::AbstractArray{T,M}) where {T<:Number, M}
-    N = ones.(length(λ)) .* (1.52 + im * 0)
+    N::Array{ComplexF64} = ones.(lastindex(λ)) .* (1.52 + im * 0)
 end # EOF glass(...)
 
 #source: http://refractiveindex.info/
@@ -26,7 +26,7 @@ function etoh(λ)
     C1 = 1.35265
     C2 = 0.00306
     C3 = 0.00002
-    N = C1 + C2./(λ.^2) + C3./(λ.^4) + im * zero(λ)
+    N::Array{ComplexF64} = C1 + C2./(λ.^2) + C3./(λ.^4) + im * zero(λ)
 end
 
 #source: http://www-swiss.ai.mit.edu/~jaffer/FreeSnell/nk.html
@@ -38,7 +38,7 @@ function aluminum(λ::AbstractArray{T,M}) where {T<:Number, M}
     knots = (sort(vec(readf["lambda"])).*1e9,)
     spl_n = interpolate(knots, vec(readf["n"]), Gridded(Linear()))
     spl_k = interpolate(knots, vec(readf["k"]), Gridded(Linear()))
-    N = spl_n(λ) + im*spl_k(λ)
+    N::Array{ComplexF64} = spl_n(vec(λ)) + im*spl_k(vec(λ))
     return N
 end # EOF aluminum(...)
 
@@ -49,7 +49,7 @@ function bk7(λ::AbstractArray{T,M}) where {T<:Number, M}
     knots = (sort(vec(readf["lambda"]).*1e9),)
     spl_n = interpolate(knots, vec(readf["n"]), Gridded(Linear()))
     spl_k = interpolate(knots, vec(readf["k"]), Gridded(Linear()))
-    N = spl_n(λ) + im*spl_k(λ)
+    N::Array{ComplexF64} = spl_n(vec(λ)) + im*spl_k(λ)
     return N
 end # EOF bk7(...)
 
@@ -61,7 +61,7 @@ function chrome(λ::AbstractArray{T,M}) where {T<:Number, M}
     knots = (sort(vec(readf["lambda"])),)
     spl_n = interpolate(knots, vec(readf["n"]), Gridded(Linear()))
     spl_k = interpolate(knots, vec(readf["k"]), Gridded(Linear()))
-    N = spl_n(λ) + im*spl_k(λ)
+    N::Array{ComplexF64} = spl_n(vec(λ)) + im*spl_k(vec(λ))
     return N
 end # EOF chrome(...)
 
@@ -73,7 +73,7 @@ function gold(λ::AbstractArray{T,M}) where {T<:Number, M}
     knots = (sort(vec(readf["lambda"])),)
     spl_n = interpolate(knots, vec(readf["n"]), Gridded(Linear()))
     spl_k = interpolate(knots, vec(readf["k"]), Gridded(Linear()))
-    N = spl_n(λ) + im*spl_k(λ)
+    N::Array{ComplexF64} = spl_n(vec(λ)) + im*spl_k(vec(λ))
     return N
 end # EOF gold(...)
 
@@ -85,7 +85,7 @@ function silicon(λ::AbstractArray{T,M}) where {T<:Number, M}
     knots = (sort(vec(readf["lambda"]))*1e9,)
     spl_n = interpolate(knots, vec(readf["n"]), Gridded(Linear()))
     spl_k = interpolate(knots, vec(readf["k"]), Gridded(Linear()))
-    N = spl_n(λ) + im*spl_k(λ)
+    N::Array{ComplexF64} = spl_n(vec(λ)) + im*spl_k(vec(λ))
     return N
 end # EOF silicon(...)
 
@@ -98,7 +98,11 @@ function silicontemperature(λ::AbstractArray{T,M}, t::S) where {T<:Number, M, S
         readf = h5open(file, "r") do file
             read(file, "silicontemperature")
         end
-        knots = (sort(vec(readf["lambda"])),)
+        # λ = vec(λ)
+        lambda = sort(vec(readf["lambda"]))
+        # https://discourse.julialang.org/t/a-question-on-extrapolation-with-interpolations-jl/3669/4
+        lambda = [prevfloat(lambda[1]);lambda[2:end-1];nextfloat(lambda[end])]
+        knots = (lambda,)
         spl_n20 = interpolate(knots, vec(readf["n20"]), Gridded(Linear()))
         aux_n20 = spl_n20(λ)
         spl_k20 = interpolate(knots, vec(readf["k20"]), Gridded(Linear()))
@@ -120,7 +124,7 @@ function silicontemperature(λ::AbstractArray{T,M}, t::S) where {T<:Number, M, S
             spl_k = interpolate(knots, vec(readf["k450"]), Gridded(Linear()))
             aux2 = spl_k(λ).*(1 .+ dkdt*(t-20.))
         end
-        N = aux + im*aux2
+        N::Array{ComplexF64} = aux + im*aux2
         return N
     end
 end # EOF silicontemperature(...)
@@ -133,8 +137,7 @@ function silver(λ::AbstractArray{T,M}) where {T<:Number, M}
     knots = (sort(vec(readf["lambda"])),)
     spl_n = interpolate(knots, vec(readf["n"]), Gridded(Linear()))
     spl_k = interpolate(knots, vec(readf["k"]), Gridded(Linear()))
-    N = spl_n(λ) + im*spl_k(λ)
-    N = aux + im*aux2
+    N::Array{ComplexF64} = spl_n(vec(λ)) + im*spl_k(vec(λ))
     return N
 end # EOF silver(...)
 
@@ -146,7 +149,7 @@ function sno2f(λ::AbstractArray{T,M}) where {T<:Number, M}
     knots = (sort(vec(readf["lambda"])*1e9),)
     spl_n = interpolate(knots, vec(readf["n"]), Gridded(Linear()))
     spl_k = interpolate(knots, vec(readf["k"]), Gridded(Linear()))
-    N = spl_n(λ) + im*spl_k(λ)
+    N::Array{ComplexF64} = spl_n(vec(λ)) + im*spl_k(vec(λ))
     return N
 end # EOF sno2f(...)
 
@@ -157,7 +160,7 @@ function h2o(λ::AbstractArray{T,M}) where {T<:Number, M}
     knots = (sort(vec(readf["lambda"])*1000),)
     spl_n = interpolate(knots, vec(readf["n"]), Gridded(Linear()))
     spl_k = interpolate(knots, vec(readf["k"]), Gridded(Linear()))
-    N = spl_n(λ) + im*spl_k(λ)
+    N::Array{ComplexF64} = spl_n(vec(λ)) + im*spl_k(vec(λ))
     return N
 end # EOF h2o(...)
 
