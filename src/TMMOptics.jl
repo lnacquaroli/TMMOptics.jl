@@ -35,14 +35,14 @@ end
 struct Bloch{T1} <: Output where {T1<:Number}
     κp::Array{T1}; κs::Array{T1}; κ::Array{T1};
 end
-struct Thickness{T1, T2} <: Output where {T1<:Number, T2<:Float64}
-    d::Array{T2}; ℓ::Array{T1};
+struct Misc{T1, T2, T3} <: Output where {T1<: Float64, T2<:Number, T3<:Number}
+    d::Array{T1}; ℓ::Array{T2}; nλ0::Array{T3};
 end
-struct Misc{T1, T2} <: Output where {T1<:Number, T2<:ComplexF64}
-    nλ0::Array{T1}; ηp::Array{T2}; ηs::Array{T2}; δ::Array{T2};
+struct AdmPhase{T1} <: Output where {T1<:ComplexF64}
+    ηp::Array{T1}; ηs::Array{T1}; δ::Array{T1};
 end
-struct Results{T1, T2, T3, T4, T5} <:Output where {T1<:Spectra, T2<:Field, T3<:Bloch, T4<:Thickness, T5<:Misc}
-    Spectra::T1; Field::T2; Bloch::T3; Thickness::T4; Misc::T5;
+struct Results{T1, T2, T3, T4, T5} <:Output where {T1<:Spectra, T2<:Field, T3<:Bloch, T4<:Misc, T5<:AdmPhase}
+    Spectra::T1; Field::T2; Bloch::T3; Misc::T4; AdmPhase::T5;
 end
 
 """
@@ -82,7 +82,8 @@ function thinfilmoptics(Beam::T1, Layers::Array{T2,N2}, emfflag::T3=0, h::T3=1, 
     # Remove last line for multilayers
     ℓ = ℓ[1:end-1]
     # call transfer matrix method for calculations
-    Rp, Rs, R, Tp, Ts, T, ρp, ρs, τp, τs, emfp, emfs, emf, ηp, ηs, δ = tmm(nseq, d, λ, θ, Beam.p, emfflag, h)
+    # Rp, Rs, R, Tp, Ts, T, ρp, ρs, τp, τs, emfp, emfs, emf, ηp, ηs, δ = tmm(nseq, d, λ, θ, Beam.p, emfflag, h)
+    tmmout = tmm(nseq, d, λ, θ, Beam.p, emfflag, h)
     # Calculation of photonic band gap for crystals without defects
     if (pbgflag == 1) & (nLen > 3)
         κp, κs, κ = pbg(λ, θ, nseq[idxλ0,2], nseq[idxλ0,3], d[2], d[3], idxλ0, Beam.p)
@@ -90,7 +91,8 @@ function thinfilmoptics(Beam::T1, Layers::Array{T2,N2}, emfflag::T3=0, h::T3=1, 
         κp = [0.]; κs = [0.]; κ = [0.]
     end
     # Return results
-    Results(Spectra(Rp, Rs, R, Tp, Ts, T, ρp, ρs, τp, τs), Field(emfp, emfs, emf), Bloch(κp, κs, κ), Thickness(d[2:end-1], ℓ), Misc(nλ0, ηp, ηs, δ[:,:,2:end-1]))
+    # Results(Spectra(Rp, Rs, R, Tp, Ts, T, ρp, ρs, τp, τs), Field(emfp, emfs, emf), Bloch(κp, κs, κ), Thickness(d[2:end-1], ℓ), Misc(nλ0, ηp, ηs, δ[:,:,2:end-1]))
+    Results(tmmout[1], tmmout[2], Bloch(κp, κs, κ), Misc(d[2:end-1], ℓ, nλ0), tmmout[3])
 end # thinfilmoptics(...)
 
 """
@@ -141,7 +143,8 @@ function tmm(nseq::AbstractArray{T1,N1}, d::AbstractArray{T2,N2}, λ::AbstractAr
         end
     end # for l in LinearIndices(λ), a in LinearIndices(θ)
     # return results
-    return Rp, Rs, R, Tp, Ts, T, ρp, ρs, τp, τs, emfp, emfs, emf, ηp, ηs, δ
+    # return Rp, Rs, R, Tp, Ts, T, ρp, ρs, τp, τs, emfp, emfs, emf, ηp, ηs, δ
+    return (Spectra(Rp, Rs, R, Tp, Ts, T, ρp, ρs, τp, τs), Field(emfp, emfs, emf), AdmPhase(ηp, ηs, δ[:,:,2:end-1]))
 end # function tmm(...)
 
 """
