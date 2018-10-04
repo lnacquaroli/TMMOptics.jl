@@ -172,7 +172,7 @@ The thicknesses of the first and last layers are not taken into account as the c
 
 ### AdmPhase subtype of output
 
-`results.AdmPhase::Results <: Output` wraps the :
+`results.AdmPhase::Results <: Output` wraps the admittances for both polarizations and the phase shift angle (thickness) for the whole structure. The fields are as follow:
 
 `ηp::Array{ComplexF64}(lastindex(beam.λ), lastindex(beam.θ), lastindex(size(nseq,2)))`: p-wave admittance of the structure.
 
