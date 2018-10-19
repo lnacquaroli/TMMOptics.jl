@@ -64,12 +64,10 @@ By setting `θ` and `λ` as arrays with more than one element each, the quantiti
 
 #### Polarization of the wave
 
-`p::Float64` indicates the polarization (linear polarization) of the wave. Accepted values are `p = 1` for the p-wave (TM), and `p = 0` for the s-wave (TE). In fact, the program computes both types at every run, so this parameter comes actually useful when is set to intermediate values, `0 < p < 1`, so quantities are averaged in `p`. The relevance of this parameter is subject to `θ != 0`, otherwise, there is no polarization effect. Floating values are recommended for this input. E.g.:
+`p::Float64` indicates the polarization (linear polarization) of the wave. Accepted values are `p = 1` for the p-wave (TM), and `p = 0` for the s-wave (TE). In fact, the program computes both types at every run, however this parameter set the admittances calculations. The relevance of this parameter is subject to `θ != 0`, otherwise, there is no polarization effect. Floating values are recommended for this input. E.g.:
 ```julia
 p = 1. # p-wave
 p = 0. # s-wave
-p = 0.5
-p = 0.4 # mixes 60% of s-wave polarized light with 40% p-wave.
 ```
 
 ### Materials type
@@ -129,14 +127,10 @@ For all cases, the thicknesses of the first and last layers are not taken into a
 
 `Rs::Array{Float64}(lastindex(beam.λ), lastindex(beam.θ))`: s-wave reflectance.
 
-`R::Array{Float64}(lastindex(beam.λ), lastindex(beam.θ))`: w averaged reflectance
-
 `Tp::Array{Float64}(lastindex(beam.λ), lastindex(beam.θ))`: p-wave transmittance.
   
 `Ts::Array{Float64}(lastindex(beam.λ), lastindex(beam.θ))`: s-wave transmittance.
  
-`T::Array{Float64}(lastindex(beam.λ), lastindex(beam.θ))`: w averaged transmittance.
-  
 `ρp::Array{ComplexF64}(lastindex(beam.λ), lastindex(beam.θ))`: p-wave complex reflection coefficient.
   
 `ρs::Array{ComplexF64}(lastindex(beam.λ), lastindex(beam.θ))`: s-wave complex reflection coefficient.
@@ -152,8 +146,6 @@ For all cases, the thicknesses of the first and last layers are not taken into a
 `emfp::Array{Float64}(lastindex(beam.λ), lastindex(beam.θ), lastindex(results.Misc.ℓ))`: p-wave electric field distribution.
   
 `emfs::Array{Float64}(lastindex(beam.λ), lastindex(beam.θ), lastindex(results.Misc.ℓ))`: s-wave electric field distribution.
-  
-`emf::Array{Float64}(lastindex(beam.λ), lastindex(beam.θ), lastindex(results.Misc.ℓ))`: w averaged electric field distribution.
 
 ### Bloch subtype of output
 
@@ -162,8 +154,6 @@ For all cases, the thicknesses of the first and last layers are not taken into a
 `κp::Array{ComplexF64}(lastindex(beam.λ), lastindex(beam.θ))`: p-wave Bloch dispersion wavevectors.
 
 `κs::Array{ComplexF64}(lastindex(beam.λ), lastindex(beam.θ))`: s-wave Bloch dispersion wavevectors.
-
-`κ::Array{ComplexF64}(lastindex(beam.λ), lastindex(beam.θ))`: w averaged Bloch dispersion wavevectors.
 
 ### Misc subtype of output
 
@@ -235,16 +225,16 @@ Included two types of plots so far are quite useful to visualize the type of str
 
 Example of plotting the index of refraction profile selected in `n`, usually for `λ0` (but could be different). This is particularly advantageous to visualize the chosen stack and track possible mistakes. For instance:
 ```julia
-nplot(beam.λ, beam.θ, beam.λ0, results.Misc.d, results.Misc.ℓ, results.Field.emf, results.Misc.nλ0, nseq)
+nplot(beam.λ, beam.θ, beam.λ0, results.Misc.d, results.Misc.ℓ, results.Field.emfp, results.Misc.nλ0, nseq)
 ```
 
-If `size(results.emf,1) > 1` prompts another plot with the EMF at `λ0` overlapping the structure.
+If `size(results.emfp,1) > 1` prompts another plot with the EMF at `λ0` overlapping the structure.
 
 #### pbgplot.jl (using PyPlot)
 
 Example of plotting the photonic dispersion of DBRs. For instance:
 ```julia
-pbgplot(beam.λ, beam.θ, results.Misc.d, results.Spectra.Rp, results.Spectra.Rs, results.Spectra.R, results.Bloch.κp, results.Bloch.κs, results.Bloch.κ)
+pbgplot(beam.λ, beam.θ, results.Misc.d, results.Spectra.Rp, results.Spectra.Rs, results.Bloch.κp, results.Bloch.κs)
 ```
 
 ## We welcome suggestions
@@ -278,3 +268,4 @@ If you have ideas and suggestions to improve TMMOptics in Julia, PRs and issues 
 ## To do
 
 * Rugate filters
+
