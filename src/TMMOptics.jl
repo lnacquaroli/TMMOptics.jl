@@ -26,14 +26,14 @@ Wrap the output into different types.
 """
 abstract type Output end
 struct Spectra{T1, T2} <: Output where {T1<:Float64, T2<:ComplexF64}
-    Rp::Array{T1}; Rs::Array{T1}; R::Array{T1}; Tp::Array{T1}; Ts::Array{T1}; T::Array{T1};
+    Rp::Array{T1}; Rs::Array{T1}; Tp::Array{T1}; Ts::Array{T1};
     ρp::Array{T2}; ρs::Array{T2}; τp::Array{T2}; τs::Array{T2};
 end
 struct Field{T1} <: Output where {T1<:Float64}
-    emfp::Array{T1}; emfs::Array{T1}; emf::Array{T1};
+    emfp::Array{T1}; emfs::Array{T1};
 end
 struct Bloch{T1} <: Output where {T1<:Number}
-    κp::Array{T1}; κs::Array{T1}; κ::Array{T1};
+    κp::Array{T1}; κs::Array{T1};
 end
 struct Misc{T1, T2, T3} <: Output where {T1<: Float64, T2<:Number, T3<:Number}
     d::Array{T1}; ℓ::Array{T2}; nλ0::Array{T3};
@@ -53,7 +53,7 @@ function thinfilmoptics(Beam::T1, Layers::Array{T2,N2}, emfflag::T3=0, h::T3=1, 
     λ::Vector{Float64} = vec(Beam.λ)
     θ::Vector{Float64} = vec(deg2rad.(Beam.θ)) # radians
     # Length of few variables
-    nLen::Int64 = lastindex(Layers)
+    nLen::Int64 = size(Layers,2)
     λLen::Int64 = lastindex(λ)
     θLen::Int64 = lastindex(θ)
     # Find λ closest to λ0
@@ -79,20 +79,18 @@ function thinfilmoptics(Beam::T1, Layers::Array{T2,N2}, emfflag::T3=0, h::T3=1, 
     temp2::Array{Float64,2} = temp1 * ones.(1,h) # outer product
     # Cumulative dinput vector: this gives the final depth profile
     ℓ = cumsum([0; temp2[:]], dims=1)
-    # Remove last line for multilayers
+    # Remove last line from cumsum
     ℓ = ℓ[1:end-1]
     # call transfer matrix method for calculations
-    # Rp, Rs, R, Tp, Ts, T, ρp, ρs, τp, τs, emfp, emfs, emf, ηp, ηs, δ = tmm(nseq, d, λ, θ, Beam.p, emfflag, h)
     tmmout = tmm(nseq, d, λ, θ, Beam.p, emfflag, h)
     # Calculation of photonic band gap for crystals without defects
     if (pbgflag == 1) & (nLen > 3)
-        κp, κs, κ = pbg(λ, θ, nseq[idxλ0,2], nseq[idxλ0,3], d[2], d[3], idxλ0, Beam.p)
+        κp, κs = pbg(λ, θ, nseq[idxλ0,2], nseq[idxλ0,3], d[2], d[3], idxλ0, Beam.p)
     else
-        κp = [0.]; κs = [0.]; κ = [0.]
+        κp = [0.]; κs = [0.]
     end
     # Return results
-    # Results(Spectra(Rp, Rs, R, Tp, Ts, T, ρp, ρs, τp, τs), Field(emfp, emfs, emf), Bloch(κp, κs, κ), Thickness(d[2:end-1], ℓ), Misc(nλ0, ηp, ηs, δ[:,:,2:end-1]))
-    Results(tmmout[1], tmmout[2], Bloch(κp, κs, κ), Misc(d[2:end-1], ℓ, nλ0), tmmout[3])
+    Results(tmmout[1], tmmout[2], Bloch(κp, κs), Misc(d[2:end-1], ℓ, nλ0), tmmout[3])
 end # thinfilmoptics(...)
 
 """
@@ -107,10 +105,10 @@ function tmm(nseq::AbstractArray{T1,N1}, d::AbstractArray{T2,N2}, λ::AbstractAr
     # Warm-up
     τs = Array{ComplexF64,2}(undef, (λLen, θLen))
     τp = similar(τs); ρs = similar(τs); ρp = similar(τs)
-    T = Array{Float64,2}(undef, (λLen, θLen))
-    R = similar(T); Ts = similar(T); Rs = similar(T); Tp = similar(T); Rp = similar(T)
+    Ts = Array{Float64,2}(undef, (λLen, θLen))
+    Tp = similar(Ts); Rs = similar(Ts); Rp = similar(Ts)
     emfs = Array{Float64,3}(undef, (λLen, θLen, hLen))
-    emfp = similar(emfs); emf = similar(emfs)
+    emfp = similar(emfs);
     δ = Array{ComplexF64,3}(undef, (λLen, θLen, nLen))
     ηs = similar(δ); ηp = similar(ηs)
     # Calculation of complex coefficients of reflection, transmission and emf
@@ -125,10 +123,8 @@ function tmm(nseq::AbstractArray{T1,N1}, d::AbstractArray{T2,N2}, λ::AbstractAr
         # Reflectance and transmittance
         Rs[l,a] = abs2(ρs[l,a])
         Rp[l,a] = abs2(ρp[l,a])
-        R[l,a] = w * Rp[l,a] + (1-w) * Rs[l,a]
         Ts[l,a] = real(ηs[l,a,1] * ηs[l,a,end]) * abs2(τs[l,a])
         Tp[l,a] = real(ηp[l,a,1] * ηp[l,a,end]) * abs2(τp[l,a])
-        T[l,a] = w * Tp[l,a] + (1-w) * Ts[l,a]
         # EMF
         if emfflag == 1
             # Calculation of the inverse optical transfer for all layers
@@ -137,14 +133,12 @@ function tmm(nseq::AbstractArray{T1,N1}, d::AbstractArray{T2,N2}, λ::AbstractAr
             # Field intensity respect to the incident beam
             emfs[l,a,:] = F⃗(gs11, gs12, ηs[l,a,1], ηs[l,a,end], Ψs)
             emfp[l,a,:] = F⃗(gp11, gp12, ηp[l,a,1], ηp[l,a,end], Ψp)
-            emf[l,a,:] = w * emfp[l,a,:] + (1-w) * emfs[l,a,:]
         else
-            emf = [0.]; emfp = [0.]; emfs = [0.]
+            emf = [0.]; emfp = [0.]
         end
     end # for l in LinearIndices(λ), a in LinearIndices(θ)
     # return results
-    # return Rp, Rs, R, Tp, Ts, T, ρp, ρs, τp, τs, emfp, emfs, emf, ηp, ηs, δ
-    return (Spectra(Rp, Rs, R, Tp, Ts, T, ρp, ρs, τp, τs), Field(emfp, emfs, emf), AdmPhase(ηp, ηs, δ[:,:,2:end-1]))
+    return (Spectra(Rp, Rs, Tp, Ts, ρp, ρs, τp, τs), Field(emfp, emfs), AdmPhase(ηp, ηs, δ[:,:,2:end-1]))
 end # function tmm(...)
 
 """
@@ -158,7 +152,7 @@ function tmatrix(N::AbstractArray{T1,N1}, d::AbstractArray{T2,N2}, λ::T3, θ::T
     # Compute angle of incidence inside each layer according to the cosine Snell law, to avoid cutoff of total internal reflection with complex angles
     cosϕ[1] = cos(θ)
     for c = 2 : NLen
-        cosϕ[c] = ϑ(N[c-1], N[c], cosϕ[c-1])
+        cosϕ[c] = cosϑ(N[c-1], N[c], cosϕ[c-1])
     end # for c = 2 : NLen
     # Calculate the admittance of the first medium for both polarizations
     ηp = ζₚ.(N, cosϕ)
@@ -225,44 +219,51 @@ Computes the photonic dispersion of ordered structures (crystals only) alternati
 function pbg(λ::AbstractArray{T1,N1}, θ::AbstractArray{T2,N2}, n1::T3, n2::T3, d1::T4, d2::T4, idxλ0::T5, w::T6) where {T1<:Number, N1, T2<:Number, N2, T3<:ComplexF64, T4<:Float64, T5<:Int64, T6<:Float64}
     # Frequency range
     f::Vector{Float64} = 2 * π ./ λ
-    # Admittances for p and s type
-    cosθ::Vector{ComplexF64} = cos.(θ)
-    ys1::Vector{ComplexF64} = ζₛ.(n1, cosθ)
-    ys2::Vector{ComplexF64} = ζₛ.(n2, cosθ)
-    yp1::Vector{ComplexF64} = ζₚ.(n1, cosθ)
-    yp2::Vector{ComplexF64} = ζₚ.(n2, cosθ)
     # Angle of incidence of the second layer with Snell's law of cosine
-    θ1::Vector{ComplexF64} = ϑ.(n1, n2, cosθ)
+    cosθ1::Vector{ComplexF64} = cos.(θ)
+    cosθ2::Vector{ComplexF64} = cosϑ.(n1, n2, cosθ1)
+    # Admittances for p and s type
+    ys1::Vector{ComplexF64} = ζₛ.(n1, cosθ1)
+    ys2::Vector{ComplexF64} = ζₛ.(n2, cosθ2)
+    yp1::Vector{ComplexF64} = ζₚ.(n1, cosθ1)
+    yp2::Vector{ComplexF64} = ζₚ.(n2, cosθ2)
     # BLoch wavevectors
-    κp, κs = Κ(d1, d2, f, n1, n2, cosθ, θ1, ys1, ys2, yp1, yp2)
-    κ = Array{ComplexF64,2}(undef, (lastindex(λ), lastindex(θ)))
-    @. κ = κp * w + κs * (1-w)
+    κp, κs = Κ(d1, d2, f, n1, n2, cosθ1, cosθ2, ys1, ys2, yp1, yp2)
     # return results
-    return κp, κs, κ
+    return κp, κs
 end # function pbg(...)
 
 """
 Bloch wavevectors for both polarizations.
 """
-function Κ(d1::T1, d2::T1, f::AbstractArray{T1,N1}, n1::T3, n2::T3, cosθ::AbstractArray{T3,N2}, θ1::AbstractArray{T3,N2}, ys1::AbstractArray{T3,N2}, ys2::AbstractArray{T3,N2}, yp1::AbstractArray{T3,N2}, yp2::AbstractArray{T3,N2}) where {T1<:Float64, N1, T3<:ComplexF64, N2}
+function Κ(d1::T1, d2::T1, ω::AbstractArray{T1,N1}, n1::T3, n2::T3, cosθ1::AbstractArray{T3,N2}, cosθ2::AbstractArray{T3,N2}, ys1::AbstractArray{T3,N2}, ys2::AbstractArray{T3,N2}, yp1::AbstractArray{T3,N2}, yp2::AbstractArray{T3,N2}) where {T1<:Float64, N1, T3<:ComplexF64, N2}
     # Warm-up
-    κp = Array{ComplexF64,2}(undef, (lastindex(f), lastindex(cosθ)))
-    κs = Array{ComplexF64,2}(undef, (lastindex(f), lastindex(cosθ)))
+    L = d1 + d2
+    cosκp = Array{ComplexF64,2}(undef, (lastindex(ω), lastindex(cosθ1)))
+    cosκs = similar(cosκp)
+    factor_s = admFactor.(ys1, ys2)
+    factor_p = admFactor.(yp1, yp2)
     # Bloch wavevectors
-    for a in LinearIndices(cosθ)
-        for b in LinearIndices(f)
-            # Bloch wavevector
-            κs[b,a] = acos(0.5 * (2 * cos(d1 * f[b] * n1 * cosθ[a] * cos(f[b] * d2 * n2 * θ1[a]) - (ys2[a]^2 + ys1[a]^2) / ys2[a] / ys1[a] * sin(f[b] * d1 * n1 * cosθ[a]) * sin(f[b] * d2 * n2 * θ1[a]))))
-            κp[b,a] = acos(0.5 * (2 * cos(d1 * f[b] * n1 * cosθ[a]) * cos(f[b] * d2 * n2 * θ1[a]) - (yp2[a]^2 + yp1[a]^2) / yp2[a] / yp1[a] * sin(f[b] * d1 * n1 * cosθ[a]) * sin(f[b] * d2 * n2 * θ1[a])))
-        end # for b in LinearIndices(f)
-    end # for a in LinearIndices(θ)
+    for a in LinearIndices(cosθ1), b in LinearIndices(ω)
+        # Bloch wavevector
+        cosκp[b,a] = cosκ(d1, d2, n1, n2, cosθ1[a], cosθ2[a], ω[b], factor_p[a])
+        cosκs[b,a] = cosκ(d1, d2, n1, n2, cosθ1[a], cosθ2[a], ω[b], factor_s[a])
+    end # for a in LinearIndices(cosθ1), b in LinearIndices(ω)
+    κp = acos.(cosκp) ./ L
+    κs = acos.(cosκs) ./ L
     return κp, κs
 end
 
+"""Prefactor for bloch wavevector"""
+admFactor(s1::T1, s2::T2) where {T1<:Number, T2<:Number} = 0.5 * (s1^2 + s2^2) / s1 / s2
+
+"""Bloch wavevector"""
+cosκ(d1::T1, d2::T1, n1::T2, n2::T2, cosθ1::T3, cosθ2::T4, ω::T1, f::T5) where {T1<:Float64, T2<:ComplexF64, T3<:Number, T4<:Number, T5<:Number} = cos(d1*ω*n1*cosθ1) * cos(ω*d2*n2*cosθ2) - f * sin(ω*d1*n1*cosθ1) * sin(ω*d2*n2*cosθ2)
+
 """
-Snell's law in cosine form.
+Snell's law in cosine form. Returns de cosine already
 """
-ϑ(n1::T1, n2::T1, cosθ::T1) where {T1<:ComplexF64} = sqrt(1 - (n1/n2)^2 * (1-cosθ^2) )
+cosϑ(n1::T1, n2::T1, cosθ::T2) where {T1<:ComplexF64, T2<:Number} = sqrt(1 - (n1/n2)^2 * (1-cosθ^2) )
 
 """
 Admittance of the medium for polarization.
