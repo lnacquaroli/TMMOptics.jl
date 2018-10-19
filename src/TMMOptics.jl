@@ -111,11 +111,10 @@ function tmm(nseq::AbstractArray{T1,N1}, d::AbstractArray{T2,N2}, λ::AbstractAr
     emfp = similar(emfs);
     δ = Array{ComplexF64,3}(undef, (λLen, θLen, nLen))
     ηs = similar(δ); ηp = similar(ηs)
-    qz = similar(δ)
     # Calculation of complex coefficients of reflection, transmission and emf
     for l in LinearIndices(λ), a in LinearIndices(θ)
         # Calculation of the optical transfer matrix for all layers
-        ηs[l,a,:], ηp[l,a,:], Ψs, Ψp, δ[l,a,:], qz[l,a,:] = tmatrix(nseq[l,:], d, λ[l], θ[a], nLen)
+        ηs[l,a,:], ηp[l,a,:], Ψs, Ψp, δ[l,a,:] = tmatrix(nseq[l,:], d, λ[l], θ[a], nLen)
         # Compute the Fresnell coefficients
         ρs[l,a] = ρ(ηs[l,a,1], ηs[l,a,end], Ψs)
         ρp[l,a] = ρ(ηp[l,a,1], ηp[l,a,end], Ψp)
@@ -155,8 +154,6 @@ function tmatrix(N::AbstractArray{T1,N1}, d::AbstractArray{T2,N2}, λ::T3, θ::T
     for c = 2 : NLen
         cosϕ[c] = cosϑ(N[c-1], N[c], cosϕ[c-1])
     end # for c = 2 : NLen
-    # parallel wavector qz
-    qz = 2 * π .* N .* sin.(acos.(cosϕ)) / λ
     # Calculate the admittance of the first medium for both polarizations
     ηp = ζₚ.(N, cosϕ)
     ηs = ζₛ.(N, cosϕ)
@@ -168,7 +165,7 @@ function tmatrix(N::AbstractArray{T1,N1}, d::AbstractArray{T2,N2}, λ::T3, θ::T
     temps = [[Ω]; Φ.(δ[2:end-1], ηs[2:end-1])]
     Ψs::Array{ComplexF64} = reduce(*, temps)
     # return results
-    return ηs, ηp, Ψs, Ψp, δ, qz
+    return ηs, ηp, Ψs, Ψp, δ
 end # tmatrix(...)
 
 """
