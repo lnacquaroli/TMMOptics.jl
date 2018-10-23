@@ -265,6 +265,8 @@ If you have ideas and suggestions to improve TMMOptics in Julia, PRs and issues 
 
 * [https://github.com/stevengj/meep](https://github.com/stevengj/meep)
 
+* [https://github.com/stevengj/mpb](https://github.com/stevengj/mpb)
+
 ## To do
 
 * Rugate filters
