@@ -13,7 +13,7 @@ julia> ]
 (v1.0) pkg> add https://github.com/lnacquaroli/TMMOptics.jl
 ```
 
-TMMOptics.jl is compatible with Julia version 1.0 or later.
+`TMMOptics.jl` is compatible with Julia version 1.0 or later.
 
 If you want to avoid reading any further you can jump to the examples posted inside the examples folder.
 
@@ -22,10 +22,10 @@ If you want to avoid reading any further you can jump to the examples posted ins
 The typical calling structure is as follow:
 
 ```julia
-results = thinfilmoptics(beam, nseq, emfflag=0, h=1, pbgflag=0)
+results = ThinFilmOptics(beam, nseq, emfflag=0, h=1, pbgflag=0)
 ```
 
-Where `thinfilmoptics` is the main function called from the module `TMMOptics.jl`.
+Where `ThinFilmOptics` is the main function called from the module `TMMOptics.jl`.
 
 ## Input arguments
 
