@@ -76,7 +76,7 @@ The `Material` supertype allows two subtypes exported by `TMMOptics.jl`. The fir
 
 `nseq::Array{Materials}` is an array setting the sequence of the materials involved in the simulation, containing the information about the index of refraction and the thickness and type of thickness that compose the multilayer stack. The order set here will be used to alternate the layers in the multilayer.
 
-The first element in `nseq` indicates the incident medium while the last one the substrate. 
+The first element in `nseq` indicates the incident medium while the last one the substrate.
 
 #### Geometrical subtype
 
@@ -128,15 +128,15 @@ For all cases, the thicknesses of the first and last layers are not taken into a
 `Rs::Array{Float64}(lastindex(beam.λ), lastindex(beam.θ))`: s-wave reflectance.
 
 `Tp::Array{Float64}(lastindex(beam.λ), lastindex(beam.θ))`: p-wave transmittance.
-  
+
 `Ts::Array{Float64}(lastindex(beam.λ), lastindex(beam.θ))`: s-wave transmittance.
- 
+
 `ρp::Array{ComplexF64}(lastindex(beam.λ), lastindex(beam.θ))`: p-wave complex reflection coefficient.
-  
+
 `ρs::Array{ComplexF64}(lastindex(beam.λ), lastindex(beam.θ))`: s-wave complex reflection coefficient.
-  
+
 `τp::Array{ComplexF64}(lastindex(beam.λ), lastindex(beam.θ))`: p-wave complex transmission coefficient.
-  
+
 `τs::Array{ComplexF64}(lastindex(beam.λ), lastindex(beam.θ))`: s-wave complex transmission coefficient.
 
 ### Field subtype of output
@@ -144,7 +144,7 @@ For all cases, the thicknesses of the first and last layers are not taken into a
 `results.Field::Results <: Output` contains information on the electromagnetic field distribution calculated, with the following fields:
 
 `emfp::Array{Float64}(lastindex(beam.λ), lastindex(beam.θ), lastindex(results.Misc.ℓ))`: p-wave electric field distribution.
-  
+
 `emfs::Array{Float64}(lastindex(beam.λ), lastindex(beam.θ), lastindex(results.Misc.ℓ))`: s-wave electric field distribution.
 
 ### Bloch subtype of output
@@ -183,7 +183,7 @@ The next two modules are optional since include functions with index of refracti
 
 Module containing a collection of functions with index of refration for the following materials: aluminum, air, bk7, chrome, dummy, glass, gold, silicon, silicontemperature, silver, sno2f, h2o, etoh. These functions accept as input arguments the wavelength range `λ`, and return the index of refraction as a complex floating number. Even for non-aborbent materials (where a list of zeros in the imaginary part is placed), the index works better with complex character. Users can use their own functions as well that output complex types though.
 
-This module depends on [Interpolations.jl](https://github.com/JuliaMath/Interpolations.jl) to return the index of refraction as a function of the input wavelength, which might differ from that of the experimental data. Also depends on [HDF5.jl](https://github.com/JuliaIO/HDF5.jl) since the data is compiled into a h5 file for simplicity. 
+This module depends on [Interpolations.jl](https://github.com/JuliaMath/Interpolations.jl) to return the index of refraction as a function of the input wavelength, which might differ from that of the experimental data. Also depends on [HDF5.jl](https://github.com/JuliaIO/HDF5.jl) since the data is compiled into a h5 file for simplicity.
 
 Use of this module as follow, e.g.:
 ```julia
@@ -239,7 +239,7 @@ pbgplot(beam.λ, beam.θ, results.Misc.d, results.Spectra.Rp, results.Spectra.Rs
 
 ## We welcome suggestions
 
-If you have ideas and suggestions to improve TMMOptics in Julia, PRs and issues are welcomed.
+If you have ideas and suggestions to improve `TMMOptics.jl` in Julia, PRs and issues are welcomed.
 
 ## Other projects in optics (not necessarily in Julia)
 
@@ -270,4 +270,3 @@ If you have ideas and suggestions to improve TMMOptics in Julia, PRs and issues 
 ## To do
 
 * Rugate filters
-
