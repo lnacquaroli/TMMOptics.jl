@@ -22,10 +22,10 @@ If you want to avoid reading any further you can jump to the examples posted ins
 The typical calling structure is as follow:
 
 ```julia
-results = ThinFilmOptics(beam, nseq, emfflag=0, h=1, pbgflag=0)
+results = thinfilmoptics(beam, nseq, emfflag=0, h=1, pbgflag=0)
 ```
 
-Where `ThinFilmOptics` is the main function called from the module `TMMOptics.jl`.
+Where `thinfilmoptics` is the main function called from the module `TMMOptics.jl`.
 
 ## Input arguments
 
