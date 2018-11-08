@@ -59,21 +59,7 @@ function thinfilmoptics(Beam::T1, Layers::Array{T2,N2}, emfflag::T3=0, h::T3=1, 
     # Find λ closest to λ0
     idxλ0::Int64 = findmin(abs.(λ .- Beam.λ0))[2][1]
     # Build the sequence of index of refractions and the array of thickness depending on the input
-    d = Array{Float64,1}(undef, nLen)
-    nλ0 = Array{ComplexF64,1}(undef, nLen)
-    nseq = Array{ComplexF64,2}(undef, (λLen, nLen))
-    for s in LinearIndices(Layers)
-        # Refractive index
-        nseq[:,s] = Layers[s].n
-        # Nice to return to plot the profile steps
-        nλ0[s] = Layers[s].n[idxλ0]
-        # convert fraction of central wavelength into physical thickness or pass the input
-        if typeof(Layers[s]) == Optical{Complex{Float64},Float64}
-            d[s] = Layers[s].f * Beam.λ0 / real(nλ0[s])
-        elseif typeof(Layers[s]) == Geometrical{Complex{Float64},Float64}
-            d[s] = Layers[s].d
-        end
-    end # for s in LinearIndices(Layers)
+    d, nseq, nλ0 = buildArrays(Layers, idxλ0, Beam.λ0, nLen, λLen)
     # Provide the multilayer depth considering the h division
     temp1::Vector{Float64} = d[2:end-1] / h
     temp2::Array{Float64,2} = temp1 * ones.(1,h) # outer product
@@ -81,8 +67,8 @@ function thinfilmoptics(Beam::T1, Layers::Array{T2,N2}, emfflag::T3=0, h::T3=1, 
     ℓ = cumsum([0; temp2[:]], dims=1)
     # Remove last line from cumsum
     ℓ = ℓ[1:end-1]
-    # call transfer matrix method for calculations
-    tmmout = tmm(nseq, d, λ, θ, Beam.p, emfflag, h)
+    # call transfer matrix method
+    tmmout = tmm(nseq, d, λ, θ, Beam.p, emfflag, h, nLen, λLen, θLen)
     # Calculation of photonic band gap for crystals without defects
     if (pbgflag == 1) & (nLen > 3)
         κp, κs = pbg(λ, θ, nseq[idxλ0,2], nseq[idxλ0,3], d[2], d[3], idxλ0, Beam.p)
@@ -93,15 +79,32 @@ function thinfilmoptics(Beam::T1, Layers::Array{T2,N2}, emfflag::T3=0, h::T3=1, 
     Results(tmmout[1], tmmout[2], Bloch(κp, κs), Misc(d[2:end-1], ℓ, nλ0), tmmout[3])
 end # thinfilmoptics(...)
 
+"""Build the sequence of index of refractions and the array of thickness depending on the input"""
+function buildArrays(layers::Array{T0,N0}, idxλ0::T1, λ0::T2, nLen::T1, λLen::T1) where {T0<:Material, N0, T1<:Int64, T2<:Float64}
+    d = Array{Float64,1}(undef, nLen)
+    nλ0 = Array{ComplexF64,1}(undef, nLen)
+    nseq = Array{ComplexF64,2}(undef, (λLen, nLen))
+    for s in LinearIndices(layers)
+        # Refractive index
+        nseq[:,s] = layers[s].n
+        # Nice to return to plot the profile steps
+        nλ0[s] = layers[s].n[idxλ0]
+        # convert fraction of central wavelength into physical thickness or pass the input
+        if typeof(layers[s]) == Optical{Complex{Float64},Float64}
+            d[s] = layers[s].f * λ0 / real(nλ0[s])
+        elseif typeof(layers[s]) == Geometrical{Complex{Float64},Float64}
+            d[s] = layers[s].d
+        end
+    end # for s in LinearIndices(Layers)
+    return d, nseq, nλ0
+end # buildArrays()
+
 """
 Computes the reflection and transmission coefficients, and their spectra. The electromagnetic field is calculated if emfflag = 1.
 """
-function tmm(nseq::AbstractArray{T1,N1}, d::AbstractArray{T2,N2}, λ::AbstractArray{T3,N3}, θ::AbstractArray{T4,N4}, w::T2, emfflag::T5, h::T5) where {T1<:ComplexF64, N1, T2<:Float64, N2, T3<:Number, N3, T4<:Number, N4, T5<:Int64}
+function tmm(nseq::AbstractArray{T1,N1}, d::AbstractArray{T2,N2}, λ::AbstractArray{T3,N3}, θ::AbstractArray{T4,N4}, w::T2, emfflag::T5, h::T5, nLen::T5, λLen::T5, θLen::T5) where {T1<:ComplexF64, N1, T2<:Float64, N2, T3<:Number, N3, T4<:Number, N4, T5<:Int64}
     # Useful lengths
-    λLen::Int64 = lastindex(λ)
-    θLen::Int64 = lastindex(θ)
     hLen::Int64 = (lastindex(d)-2) * h
-    nLen::Int64 = size(nseq,2)
     # Warm-up
     τs = Array{ComplexF64,2}(undef, (λLen, θLen))
     τp = similar(τs); ρs = similar(τs); ρp = similar(τs)
@@ -217,42 +220,27 @@ F⃗(g11::Array{T1,N1}, g12::Array{T1,N1}, s1::T1, sf::T1, Ψ::AbstractArray{T1,
 Computes the photonic dispersion of ordered structures (crystals only) alternating two different dielectric layers (pbgflag = 1).
 """
 function pbg(λ::AbstractArray{T1,N1}, θ::AbstractArray{T2,N2}, n1::T3, n2::T3, d1::T4, d2::T4, idxλ0::T5, w::T6) where {T1<:Number, N1, T2<:Number, N2, T3<:ComplexF64, T4<:Float64, T5<:Int64, T6<:Float64}
-    # Frequency range
-    f::Vector{Float64} = 2 * π ./ λ
+    # angular frequency
+    ω::Vector{Float64} = 2 * π ./ λ
+    # Unit cell
+    L::Float64 = d1 + d2
     # Angle of incidence of the second layer with Snell's law of cosine
     cosθ1::Vector{ComplexF64} = cos.(θ)
     cosθ2::Vector{ComplexF64} = cosϑ.(n1, n2, cosθ1)
-    # Admittances for p and s type
-    ys1::Vector{ComplexF64} = ζₛ.(n1, cosθ1)
-    ys2::Vector{ComplexF64} = ζₛ.(n2, cosθ2)
-    yp1::Vector{ComplexF64} = ζₚ.(n1, cosθ1)
-    yp2::Vector{ComplexF64} = ζₚ.(n2, cosθ2)
-    # BLoch wavevectors
-    κp, κs = Κ(d1, d2, f, n1, n2, cosθ1, cosθ2, ys1, ys2, yp1, yp2)
-    # return results
-    return κp, κs
-end # function pbg(...)
-
-"""
-Bloch wavevectors for both polarizations.
-"""
-function Κ(d1::T1, d2::T1, ω::AbstractArray{T1,N1}, n1::T3, n2::T3, cosθ1::AbstractArray{T3,N2}, cosθ2::AbstractArray{T3,N2}, ys1::AbstractArray{T3,N2}, ys2::AbstractArray{T3,N2}, yp1::AbstractArray{T3,N2}, yp2::AbstractArray{T3,N2}) where {T1<:Float64, N1, T3<:ComplexF64, N2}
+    # Prefactor for Bloch wavevector
+    factor_s = admFactor.(ζₛ.(n1, cosθ1), ζₛ.(n2, cosθ2))
+    factor_p = admFactor.(ζₚ.(n1, cosθ1), ζₚ.(n2, cosθ2))
     # Warm-up
-    L = d1 + d2
     cosκp = Array{ComplexF64,2}(undef, (lastindex(ω), lastindex(cosθ1)))
     cosκs = similar(cosκp)
-    factor_s = admFactor.(ys1, ys2)
-    factor_p = admFactor.(yp1, yp2)
     # Bloch wavevectors
     for a in LinearIndices(cosθ1), b in LinearIndices(ω)
-        # Bloch wavevector
         cosκp[b,a] = cosκ(d1, d2, n1, n2, cosθ1[a], cosθ2[a], ω[b], factor_p[a])
         cosκs[b,a] = cosκ(d1, d2, n1, n2, cosθ1[a], cosθ2[a], ω[b], factor_s[a])
     end # for a in LinearIndices(cosθ1), b in LinearIndices(ω)
-    κp = acos.(cosκp) ./ L
-    κs = acos.(cosκs) ./ L
-    return κp, κs
-end
+    # return results of Bloch wavevectors
+    return acos.(cosκp)./L, acos.(cosκs)./L
+end # function pbg(...)
 
 """Prefactor for bloch wavevector"""
 admFactor(s1::T1, s2::T2) where {T1<:Number, T2<:Number} = 0.5 * (s1^2 + s2^2) / s1 / s2
