@@ -115,7 +115,7 @@ function tmm(nseq::AbstractArray{T1,N1}, d::AbstractArray{T2,N2}, λ::AbstractAr
     δ = Array{ComplexF64,3}(undef, (λLen, θLen, nLen))
     ηs = similar(δ); ηp = similar(ηs)
     # Calculation of complex coefficients of reflection, transmission and emf
-    for l in LinearIndices(λ), a in LinearIndices(θ)
+    for a in LinearIndices(θ), l in LinearIndices(λ)
         # Calculation of the optical transfer matrix for all layers
         ηs[l,a,:], ηp[l,a,:], Ψs, Ψp, δ[l,a,:] = tmatrix(nseq[l,:], d, λ[l], θ[a], nLen)
         # Compute the Fresnell coefficients
