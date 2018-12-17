@@ -54,8 +54,8 @@ function thinfilmoptics(Beam::T1, Layers::Array{T2,N2}, emfflag::T3=0, h::T3=1, 
     θ::Vector{Float64} = vec(deg2rad.(Beam.θ)) # radians
     # Length of few variables
     nLen::Int64 = size(Layers,2)
-    λLen::Int64 = lastindex(λ)
-    θLen::Int64 = lastindex(θ)
+    λLen::Int64 = length(λ)
+    θLen::Int64 = length(θ)
     # Find λ closest to λ0
     idxλ0::Int64 = findmin(abs.(λ .- Beam.λ0))[2][1]
     # Build the sequence of index of refractions and the array of thickness depending on the input
@@ -84,7 +84,7 @@ function buildArrays(layers::Array{T0,N0}, idxλ0::T1, λ0::T2, nLen::T1, λLen:
     d = Array{Float64,1}(undef, nLen)
     nλ0 = Array{ComplexF64,1}(undef, nLen)
     nseq = Array{ComplexF64,2}(undef, (λLen, nLen))
-    for s in LinearIndices(layers)
+    @inbounds for s in eachindex(layers)
         # Refractive index
         nseq[:,s] = layers[s].n
         # Nice to return to plot the profile steps
@@ -95,7 +95,7 @@ function buildArrays(layers::Array{T0,N0}, idxλ0::T1, λ0::T2, nLen::T1, λLen:
         elseif typeof(layers[s]) == Geometrical{Complex{Float64},Float64}
             d[s] = layers[s].d
         end
-    end # for s in LinearIndices(Layers)
+    end # for s in eachindex(Layers)
     return d, nseq, nλ0
 end # buildArrays()
 
@@ -104,7 +104,7 @@ Computes the reflection and transmission coefficients, and their spectra. The el
 """
 function tmm(nseq::AbstractArray{T1,N1}, d::AbstractArray{T2,N2}, λ::AbstractArray{T3,N3}, θ::AbstractArray{T4,N4}, w::T2, emfflag::T5, h::T5, nLen::T5, λLen::T5, θLen::T5) where {T1<:ComplexF64, N1, T2<:Float64, N2, T3<:Number, N3, T4<:Number, N4, T5<:Int64}
     # Useful lengths
-    hLen::Int64 = (lastindex(d)-2) * h
+    hLen::Int64 = (length(d)-2) * h
     # Warm-up
     τs = Array{ComplexF64,2}(undef, (λLen, θLen))
     τp = similar(τs); ρs = similar(τs); ρp = similar(τs)
@@ -115,7 +115,7 @@ function tmm(nseq::AbstractArray{T1,N1}, d::AbstractArray{T2,N2}, λ::AbstractAr
     δ = Array{ComplexF64,3}(undef, (λLen, θLen, nLen))
     ηs = similar(δ); ηp = similar(ηs)
     # Calculation of complex coefficients of reflection, transmission and emf
-    for a in LinearIndices(θ), l in LinearIndices(λ)
+    @inbounds for a in eachindex(θ), l in eachindex(λ)
         # Calculation of the optical transfer matrix for all layers
         ηs[l,a,:], ηp[l,a,:], Ψs, Ψp, δ[l,a,:] = tmatrix(nseq[l,:], d, λ[l], θ[a], nLen)
         # Compute the Fresnell coefficients
@@ -139,7 +139,7 @@ function tmm(nseq::AbstractArray{T1,N1}, d::AbstractArray{T2,N2}, λ::AbstractAr
         else
             emf = [0.]; emfp = [0.]
         end
-    end # for l in LinearIndices(λ), a in LinearIndices(θ)
+    end # for l in eachindex(λ), a in eachindex(θ)
     # return results
     return (Spectra(Rp, Rs, Tp, Ts, ρp, ρs, τp, τs), Field(emfp, emfs), AdmPhase(ηp, ηs, δ[:,:,2:end-1]))
 end # function tmm(...)
@@ -154,7 +154,7 @@ function tmatrix(N::AbstractArray{T1,N1}, d::AbstractArray{T2,N2}, λ::T3, θ::T
     Ω = complex.([1. 0.; 0. 1.])
     # Compute angle of incidence inside each layer according to the cosine Snell law, to avoid cutoff of total internal reflection with complex angles
     cosϕ[1] = cos(θ)
-    for c = 2 : NLen
+    @inbounds for c = 2 : NLen
         cosϕ[c] = cosϑ(N[c-1], N[c], cosϕ[c-1])
     end # for c = 2 : NLen
     # Calculate the admittance of the first medium for both polarizations
@@ -195,7 +195,7 @@ function G(N::AbstractArray{T1,N1}, d::AbstractArray{T2,N2}, λ::T3, θ::T4, NLe
     g12 = similar(g11)
     # Divide the phase shift by h but keep η as is for each layer
     mδ::Array{ComplexF64} = δ/h
-    for c = 2 : NLen-1, j = 1 : h
+    @inbounds for c = 2 : NLen-1, j = 1 : h
         k::Int64 = h * (c-2) + j
         m1 = Ξ(mδ[c], η[c]) * m1
         m0 = m1 * Ψ
@@ -231,13 +231,13 @@ function pbg(λ::AbstractArray{T1,N1}, θ::AbstractArray{T2,N2}, n1::T3, n2::T3,
     factor_s = admFactor.(ζₛ.(n1, cosθ1), ζₛ.(n2, cosθ2))
     factor_p = admFactor.(ζₚ.(n1, cosθ1), ζₚ.(n2, cosθ2))
     # Warm-up
-    cosκp = Array{ComplexF64,2}(undef, (lastindex(ω), lastindex(cosθ1)))
+    cosκp = Array{ComplexF64,2}(undef, (length(ω), length(cosθ1)))
     cosκs = similar(cosκp)
     # Bloch wavevectors
-    for a in LinearIndices(cosθ1), b in LinearIndices(ω)
+    @inbounds for a in eachindex(cosθ1), b in eachindex(ω)
         cosκp[b,a] = cosκ(d1, d2, n1, n2, cosθ1[a], cosθ2[a], ω[b], factor_p[a])
         cosκs[b,a] = cosκ(d1, d2, n1, n2, cosθ1[a], cosθ2[a], ω[b], factor_s[a])
-    end # for a in LinearIndices(cosθ1), b in LinearIndices(ω)
+    end # for a in eachindex(cosθ1), b in eachindex(ω)
     # return results of Bloch wavevectors
     return acos.(cosκp)./L, acos.(cosκs)./L
 end # function pbg(...)
