@@ -31,7 +31,7 @@ Where `thinfilmoptics` is the main function called from the module `TMMOptics.jl
 
 ### LightSource type
 
-`beam::PlaneWave` is a subtype that defines the type of light source used in the simulation. At the moment the only subtype accepted is `PlaneWave <: LightSource`, which is exported by `TMMOptics.jl`. To call this subtype we can write `beam = PlaneWave(λ, λ0, θ, p)`, where the parameters required are described below.
+`beam::PlaneWave` is a subtype that defines the type of light source used in the simulation. At the moment the only subtype accepted is `PlaneWave <: LightSource`, which is exported by `TMMOptics.jl`. To call this subtype we can write `beam = PlaneWave(λ, λ0, θ)`, where the parameters required are described below.
 
 #### Wavelength range
 
@@ -64,11 +64,7 @@ By setting `θ` and `λ` as arrays with more than one element each, the quantiti
 
 #### Polarization of the wave
 
-`p::Float64` indicates the polarization (linear polarization) of the wave. Accepted values are `p = 1` for the p-wave (TM), and `p = 0` for the s-wave (TE). In fact, the program computes both types at every run, however this parameter set the admittances calculations. The relevance of this parameter is subject to `θ != 0`, otherwise, there is no polarization effect. Floating values are recommended for this input. E.g.:
-```julia
-p = 1. # p-wave
-p = 0. # s-wave
-```
+The module computes both types, p and s waves, at every run.
 
 ### Materials type
 
@@ -123,37 +119,37 @@ For all cases, the thicknesses of the first and last layers are not taken into a
 
 `results.Spectra::Results <: Output` contains information on the reflectance, transmittance and fresnell coefficients spectra. Inside this subtype there exist the following fields:
 
-`Rp::Array{Float64}(lastindex(beam.λ), lastindex(beam.θ))`: p-wave reflectance.
+`Rp::Array{Float64}(length(beam.λ), length(beam.θ))`: p-wave reflectance.
 
-`Rs::Array{Float64}(lastindex(beam.λ), lastindex(beam.θ))`: s-wave reflectance.
+`Rs::Array{Float64}(length(beam.λ), length(beam.θ))`: s-wave reflectance.
 
-`Tp::Array{Float64}(lastindex(beam.λ), lastindex(beam.θ))`: p-wave transmittance.
+`Tp::Array{Float64}(length(beam.λ), length(beam.θ))`: p-wave transmittance.
 
-`Ts::Array{Float64}(lastindex(beam.λ), lastindex(beam.θ))`: s-wave transmittance.
+`Ts::Array{Float64}(length(beam.λ), length(beam.θ))`: s-wave transmittance.
 
-`ρp::Array{ComplexF64}(lastindex(beam.λ), lastindex(beam.θ))`: p-wave complex reflection coefficient.
+`ρp::Array{ComplexF64}(length(beam.λ), length(beam.θ))`: p-wave complex reflection coefficient.
 
-`ρs::Array{ComplexF64}(lastindex(beam.λ), lastindex(beam.θ))`: s-wave complex reflection coefficient.
+`ρs::Array{ComplexF64}(length(beam.λ), length(beam.θ))`: s-wave complex reflection coefficient.
 
-`τp::Array{ComplexF64}(lastindex(beam.λ), lastindex(beam.θ))`: p-wave complex transmission coefficient.
+`τp::Array{ComplexF64}(length(beam.λ), length(beam.θ))`: p-wave complex transmission coefficient.
 
-`τs::Array{ComplexF64}(lastindex(beam.λ), lastindex(beam.θ))`: s-wave complex transmission coefficient.
+`τs::Array{ComplexF64}(length(beam.λ), length(beam.θ))`: s-wave complex transmission coefficient.
 
 ### Field subtype of output
 
 `results.Field::Results <: Output` contains information on the electromagnetic field distribution calculated, with the following fields:
 
-`emfp::Array{Float64}(lastindex(beam.λ), lastindex(beam.θ), lastindex(results.Misc.ℓ))`: p-wave electric field distribution.
+`emfp::Array{Float64}(length(beam.λ), length(beam.θ), length(results.Misc.ℓ))`: p-wave electric field distribution.
 
-`emfs::Array{Float64}(lastindex(beam.λ), lastindex(beam.θ), lastindex(results.Misc.ℓ))`: s-wave electric field distribution.
+`emfs::Array{Float64}(length(beam.λ), length(beam.θ), length(results.Misc.ℓ))`: s-wave electric field distribution.
 
 ### Bloch subtype of output
 
 `results.Bloch::Results <: Output` contains information on the Bloch wavevectors calculated for DBRs, with the following fields:
 
-`κp::Array{ComplexF64}(lastindex(beam.λ), lastindex(beam.θ))`: p-wave Bloch dispersion wavevectors.
+`κp::Array{ComplexF64}(length(beam.λ), length(beam.θ))`: p-wave Bloch dispersion wavevectors.
 
-`κs::Array{ComplexF64}(lastindex(beam.λ), lastindex(beam.θ))`: s-wave Bloch dispersion wavevectors.
+`κs::Array{ComplexF64}(length(beam.λ), length(beam.θ))`: s-wave Bloch dispersion wavevectors.
 
 ### Misc subtype of output
 
@@ -169,11 +165,11 @@ For all cases, the thicknesses of the first and last layers are not taken into a
 
 `results.AdmPhase::Results <: Output` wraps the admittances for both polarizations and the phase shift angle (thickness) for the whole structure. The fields are as follow:
 
-`ηp::Array{ComplexF64}(lastindex(beam.λ), lastindex(beam.θ), lastindex(size(nseq,2)))`: p-wave admittance of the structure.
+`ηp::Array{ComplexF64}(length(beam.λ), length(beam.θ), length(size(nseq,2)))`: p-wave admittance of the structure.
 
-`ηs::Array{ComplexF64}(lastindex(beam.λ), lastindex(beam.θ), lastindex(size(nseq,2)))`: s-wave admittance of the structure.
+`ηs::Array{ComplexF64}(length(beam.λ), length(beam.θ), length(size(nseq,2)))`: s-wave admittance of the structure.
 
-`δ::Array{ComplexF64}(lastindex(beam.λ), lastindex(beam.θ), lastindex(size(nseq,2))-2)`: phase shift (thickness) of the structure without the incident and substrate media.
+`δ::Array{ComplexF64}(length(beam.λ), length(beam.θ), length(size(nseq,2))-2)`: phase shift (thickness) of the structure without the incident and substrate media.
 
 ## Examples of index of refraction functions used
 
