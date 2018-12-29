@@ -11,8 +11,7 @@ end # EOF dummy(...)
 # λ = λi:λf
 λ0 = 700. # reference wavelength
 θ = [0.] # angle of incidence [degrees]
-p = 1. # polatization (s-wave = 0. and p-wave = 1., or any intermediate)
-beam = PlaneWave(λ, λ0, θ, p)
+beam = PlaneWave(λ, λ0, θ)
 
 # Define layers
 l0 = Geometrical(dummy(beam.λ, 1., 0.), 0.)
